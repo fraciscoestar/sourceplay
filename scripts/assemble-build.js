@@ -22,6 +22,8 @@ const sudokuDist = path.join(__dirname, '../packages/sudoku/dist');
 const targetSudokuPath = path.join(selectorDist, 'games/sudoku');
 const nonogramDist = path.join(__dirname, '../packages/nonogram/dist');
 const targetNonogramPath = path.join(selectorDist, 'games/nonogram');
+const wordsearchDist = path.join(__dirname, '../packages/wordsearch/dist');
+const targetWordsearchPath = path.join(selectorDist, 'games/wordsearch');
 
 console.log('Ensamblando despliegue final de SourcePlay...');
 
@@ -44,6 +46,14 @@ if (fs.existsSync(nonogramDist)) {
   console.log('¡Nonograma copiado con éxito!');
 } else {
   console.warn('Advertencia: Compilación de Nonograma no encontrada.');
+}
+
+if (fs.existsSync(wordsearchDist)) {
+  console.log(`Copiando build de Sopa de letras de ${wordsearchDist} a ${targetWordsearchPath}...`);
+  copyDirSync(wordsearchDist, targetWordsearchPath);
+  console.log('¡Sopa de letras copiada con éxito!');
+} else {
+  console.warn('Advertencia: Compilación de Sopa de letras no encontrada.');
 }
 
 console.log('Ensamblado completado con éxito.');
