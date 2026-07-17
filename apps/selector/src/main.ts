@@ -23,6 +23,13 @@ const GAMES_REGISTRY: GameInfo[] = [
     description: 'Descubre el patrón oculto usando las pistas numéricas de filas y columnas. Cuatro tamaños disponibles.',
     url: import.meta.env.DEV ? 'http://localhost:5175/' : './games/nonogram/index.html',
     imageUrl: './assets/covers/nonogram.jpg'
+  },
+  {
+    id: 'wordsearch',
+    title: 'Sopa de letras',
+    description: 'Encuentra las palabras ocultas en la cuadrícula en horizontal, vertical o diagonal.',
+    url: import.meta.env.DEV ? 'http://localhost:5176/' : './games/wordsearch/index.html',
+    imageUrl: './assets/covers/wordsearch.jpg'
   }
 ];
 
