@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Space+Mono:wght@400;700&display=swap');
+
+:root, .light-theme {
+  --paper: #ECE7D6;
+  --paper-deep: #E1DAC3;
+  --ink: #211F1A;
+  --ink-soft: #6B6553;
+  --navy: #233A5E;
+  --teal: #0F6E64;
+  --teal-deep: #0B564E;
+  --amber: #E7B23A;
+  --amber-soft: #F2E3B6;
+  --same: #CFE7E1;
+  --line: #B8AF93;
+  --line-strong: #211F1A;
+  --danger: #A3452E;
+  --radius: 6px;
+}
+
+.dark-theme {
+  --paper: #1B1A17;
+  --paper-deep: #262521;
+  --ink: #ECE7D6;
+  --ink-soft: #9E9885;
+  --navy: #7FA6DE;
+  --teal: #33ACA0;
+  --teal-deep: #4DB6AC;
+  --amber: #C99318;
+  --amber-soft: #383428;
+  --same: #223B36;
+  --line: #4F4B3F;
+  --line-strong: #ECE7D6;
+  --danger: #E57373;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'Space Mono', monospace;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* Cabecera compartida SourcePlay */
+.sp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 3px solid var(--ink);
+  background-color: var(--paper-deep);
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+.sp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.sp-logo-link {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 26px;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.015em;
+  transition: color 0.25s ease;
+}
+.sp-logo-link:hover {
+  color: var(--teal);
+}
+.sp-back-btn {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  background-color: var(--paper);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s, transform 0.05s;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.sp-back-btn:hover {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+.sp-back-btn:active { transform: translateY(1px); }
+
+.sp-theme-toggle {
+  background: none;
+  border: 2px solid var(--ink);
+  padding: 7px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--paper);
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s, transform 0.05s;
+}
+.sp-theme-toggle:hover {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+.sp-theme-toggle:active { transform: translateY(1px); }
+.sp-theme-toggle svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* Control de visibilidad del Icono de Sol / Luna */
+.sp-theme-toggle .theme-icon-moon { display: none; }
+.sp-theme-toggle .theme-icon-sun { display: block; }
+
+.dark-theme .sp-theme-toggle .theme-icon-moon { display: block; }
+.dark-theme .sp-theme-toggle .theme-icon-sun { display: none; }

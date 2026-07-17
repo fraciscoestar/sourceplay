@@ -1,0 +1,169 @@
+@import "@sourceplay/shared/style.css";
+
+html, body {
+  overflow: hidden;
+  height: 100%;
+}
+
+.app {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: calc(100dvh - 72px); /* Subtract header height */
+  overflow: hidden;
+}
+
+.hero {
+  text-align: center;
+  margin: 20px 0 20px;
+  max-width: 600px;
+  flex-shrink: 0;
+}
+
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: clamp(28px, 6vw, 44px);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  transition: color 0.25s ease;
+}
+
+.hero .subtitle {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0;
+  transition: color 0.25s ease;
+}
+
+.grid-container {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 10px 4px 30px;
+  /* Hide scrollbar for clean interface (standard browsers) */
+  scrollbar-width: thin;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%;
+  margin-bottom: 0px;
+}
+
+/* Tarjeta de juego física */
+.game-card {
+  background-color: var(--paper-deep);
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 6px 0 var(--ink);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.25s ease, border-color 0.25s ease;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 0 var(--ink);
+}
+
+.game-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.game-card-img-wrap {
+  width: 100%;
+  aspect-ratio: 16/10;
+  border-bottom: 3px solid var(--ink);
+  overflow: hidden;
+  background-color: var(--paper);
+  position: relative;
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.game-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.game-card:hover .game-card-img {
+  transform: scale(1.03);
+}
+
+.game-card-content {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+}
+
+.game-card-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: 22px;
+  margin: 0;
+  color: var(--ink);
+  transition: color 0.25s ease;
+}
+
+.game-card-desc {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+  transition: color 0.25s ease;
+}
+
+.game-card-btn {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  border: 2px solid var(--ink);
+  background-color: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius);
+  padding: 10px;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.game-card:hover .game-card-btn {
+  background-color: var(--teal-deep);
+  color: var(--paper);
+  border-color: var(--teal-deep);
+}
+
+footer {
+  border-top: 2px dashed var(--ink-soft);
+  width: 100%;
+  text-align: center;
+  padding: 12px 0;
+  margin-top: 0;
+  flex-shrink: 0;
+  transition: border-color 0.25s ease;
+}
+
+footer p {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: 0;
+  transition: color 0.25s ease;
+}

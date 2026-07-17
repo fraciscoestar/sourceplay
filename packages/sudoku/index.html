@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku — SourcePlay</title>
+  <script type="module">
+    import { initTheme } from '@sourceplay/shared';
+    initTheme();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <!-- MENÚ DE INICIO -->
+    <div id="startMenu" class="view">
+      <header class="game-local-header">
+        <h1>Sudoku</h1>
+        <p class="menu-subtitle">Selecciona una dificultad para jugar</p>
+      </header>
+
+      <div class="menu-content">
+        <div class="diff-vertical-grid" id="menuDiffGrid"></div>
+        
+        <div class="seed-section">
+          <span class="seed-label">Semilla personalizada (opcional):</span>
+          <input type="text" id="menuSeedInput" placeholder="Escribe una semilla propia…">
+        </div>
+
+        <button class="btn primary bold-btn" id="startGameBtn">Empezar Partida</button>
+      </div>
+    </div>
+
+    <!-- PANTALLA DE JUEGO (Oculta por defecto) -->
+    <div id="gameArea" class="view hidden">
+      <header class="game-local-header">
+        <h1>Sudoku</h1>
+      </header>
+
+      <div class="ticket">
+        <span>Semilla&nbsp;<b id="seedLabel">—</b></span>
+        <span class="diff-tag" id="diffTag">—</span>
+      </div>
+
+      <div class="board-wrap">
+        <div id="board"></div>
+        <div class="loading-veil" id="loadingVeil">Generando sudoku…</div>
+      </div>
+
+      <div class="controls">
+        <div class="row-line">
+          <button class="btn" id="notesToggle">Notas: Off</button>
+          <button class="btn ghost" id="eraseBtn">Borrar</button>
+        </div>
+
+        <div class="keypad" id="keypad"></div>
+
+        <!-- CONTROLES DE ACCIONES (DESHACER, REHACER, CHECKPOINTS) -->
+        <div class="row-line">
+          <button class="btn icon-btn tooltip" id="undoBtn" disabled data-tooltip="Deshacer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+          </button>
+          <button class="btn icon-btn tooltip" id="redoBtn" disabled data-tooltip="Rehacer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+          </button>
+          <button class="btn icon-btn tooltip" id="createCheckpointBtn" data-tooltip="Crear Checkpoint">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/><line x1="12" x2="12" y1="7" y2="13"/><line x1="9" x2="15" y1="10" y2="10"/></svg>
+          </button>
+          <button class="btn icon-btn tooltip" id="gameLoadCheckpointBtn" data-tooltip="Cargar Checkpoint">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+
+        <!-- CONTROLES DE SALIDA / REINICIO -->
+        <div class="row-line">
+          <button class="btn primary" id="restartGameBtn">Reiniciar</button>
+          <button class="btn ghost" id="exitToMenuBtn">Salir al menú</button>
+        </div>
+
+        <div class="status-row">
+          <span id="progressLabel">0 / 81</span>
+          <span id="timer">00:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIONES -->
+  <div class="toast" id="toast"></div>
+
+  <!-- MODAL DE CHECKPOINT: CREAR -->
+  <div class="overlay" id="createCheckpointOverlay">
+    <div class="modal">
+      <h2>Guardar Partida</h2>
+      <p>Escribe un nombre para este checkpoint (Máximo 3 guardados):</p>
+      <input type="text" id="checkpointNameInput" placeholder="Mi partida guardada..." maxlength="20">
+      <div class="row-line" style="margin-top: 18px;">
+        <button class="btn" id="cancelCreateCheckpointBtn">Cancelar</button>
+        <button class="btn primary" id="saveCheckpointBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CHECKPOINT: LISTAR / CARGAR -->
+  <div class="overlay" id="loadCheckpointOverlay">
+    <div class="modal" style="max-width: 400px; width: 90%;">
+      <h2>Cargar Partida</h2>
+      <div id="checkpointList">
+        <!-- Se inyectará dinámicamente -->
+      </div>
+      <button class="btn" id="closeLoadCheckpointBtn" style="width: 100%; margin-top: 10px;">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN COMÚN -->
+  <div class="overlay" id="confirmOverlay">
+    <div class="modal">
+      <h2 id="confirmTitle">¿Confirmar acción?</h2>
+      <p id="confirmDesc">Se perderá el progreso de la partida actual.</p>
+      <div class="row-line" style="margin-top: 18px;">
+        <button class="btn" id="confirmCancelBtn">Cancelar</button>
+        <button class="btn primary" id="confirmOkBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY DE VICTORIA -->
+  <div class="overlay" id="winOverlay">
+    <div class="modal">
+      <h2>¡Resuelto!</h2>
+      <p id="winStats"></p>
+      <button class="btn primary" id="winReplayBtn">Jugar otra partida</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

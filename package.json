@@ -1,0 +1,24 @@
+{
+  "name": "sourceplay-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo de minijuegos SourcePlay",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\"",
+    "dev:selector": "npm run dev --workspace=@sourceplay/selector",
+    "dev:sudoku": "npm run dev --workspace=@sourceplay/sudoku",
+    "dev:nonogram": "npm run dev --workspace=@sourceplay/nonogram",
+    "build:all": "npm run build --workspaces --if-present && npm run assemble",
+    "assemble": "node scripts/assemble-build.js"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3"
+  }
+}

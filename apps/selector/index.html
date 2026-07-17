@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SourcePlay — Selector de Juegos</title>
+  <script type="module">
+    import { initTheme } from '@sourceplay/shared';
+    initTheme();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <h1>SourcePlay</h1>
+      <p class="subtitle">Una colección de minijuegos clásicos e interactivos listos para jugar en tu navegador.</p>
+    </div>
+
+    <main class="grid-container">
+      <div class="games-grid" id="gamesGrid"></div>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 SourcePlay. Hecho con ❤️ y TypeScript.</p>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
