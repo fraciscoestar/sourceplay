@@ -1,4 +1,5 @@
 import { generateWordSearch } from './core';
+import { SPANISH_WORDS } from './words';
 
 function testGenerator() {
   console.log('Testing board generator...');
@@ -43,6 +44,24 @@ function testGenerator() {
       throw new Error(`Difficulty ${diff.name} expected ${diff.expectedWordCount} words, got ${board.words.length}`);
     }
     console.log(`Difficulty '${diff.name}' checked: grid ${diff.expectedSize}x${diff.expectedSize}, words: ${diff.expectedWordCount}`);
+  }
+
+  // Test palindrome support
+  console.log('Testing palindrome support...');
+  const originalWords = [...SPANISH_WORDS];
+  try {
+    SPANISH_WORDS.length = 0;
+    SPANISH_WORDS.push('RADAR', 'ELLE', 'CASA', 'LUNA', 'MESA', 'ROPA', 'PISO', 'CENA', 'BOLA', 'TEMA');
+    
+    const board = generateWordSearch('medio', 'palindrometest');
+    
+    if (!board.words.includes('RADAR') || !board.words.includes('ELLE')) {
+      throw new Error('Test setup error: RADAR or ELLE not selected');
+    }
+    console.log('Palindrome board generated successfully with words:', board.words.join(', '));
+  } finally {
+    SPANISH_WORDS.length = 0;
+    SPANISH_WORDS.push(...originalWords);
   }
 
   console.log('Generator test PASSED. Words chosen for medio:', b1.words.join(', '));

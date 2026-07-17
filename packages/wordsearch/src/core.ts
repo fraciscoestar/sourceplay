@@ -127,8 +127,10 @@ function tryGenerateBoard(
   // 7. Verify no accidental double occurrences of selected words
   for (const word of selectedWords) {
     const occurrences = countWordOccurrences(grid, word, size);
-    if (occurrences !== 1) {
-      return null; // fails condition of exactly 1 occurrence, discard grid
+    const isPalindrome = word === word.split('').reverse().join('');
+    const expected = isPalindrome ? 2 : 1;
+    if (occurrences !== expected) {
+      return null; // fails condition of expected occurrences, discard grid
     }
   }
 
