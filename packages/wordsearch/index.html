@@ -10,7 +10,86 @@
   </script>
 </head>
 <body>
-  <div id="app">Sopa de Letras Scaffold</div>
+  <div class="app">
+    <!-- MENÚ DE INICIO -->
+    <div id="startMenu" class="view">
+      <header class="game-local-header">
+        <h1>Sopa de Letras</h1>
+        <p class="menu-subtitle">Selecciona una dificultad para jugar</p>
+      </header>
+
+      <div class="menu-content">
+        <div class="diff-vertical-grid" id="menuDiffGrid"></div>
+        
+        <div class="seed-section">
+          <span class="seed-label">Semilla personalizada (opcional):</span>
+          <input type="text" id="menuSeedInput" placeholder="Escribe una semilla propia…">
+        </div>
+
+        <button class="btn primary bold-btn" id="startGameBtn">Empezar Partida</button>
+      </div>
+    </div>
+
+    <!-- PANTALLA DE JUEGO (Oculta por defecto) -->
+    <div id="gameArea" class="view hidden">
+      <header class="game-local-header">
+        <h1>Sopa de Letras</h1>
+      </header>
+
+      <div class="ticket">
+        <span>Semilla&nbsp;<b id="seedLabel">—</b></span>
+        <span class="diff-tag" id="diffTag">—</span>
+      </div>
+
+      <div class="board-wrap">
+        <div id="board"></div>
+      </div>
+
+      <div class="controls">
+        <!-- LISTADO DE PALABRAS -->
+        <div class="word-list-container">
+          <h3>Palabras a buscar:</h3>
+          <div id="wordList" class="word-list"></div>
+        </div>
+
+        <!-- CONTROLES DE SALIDA / REINICIO -->
+        <div class="row-line">
+          <button class="btn primary" id="restartGameBtn">Reiniciar</button>
+          <button class="btn ghost" id="exitToMenuBtn">Salir al menú</button>
+        </div>
+
+        <div class="status-row">
+          <span id="progressLabel">0 / 0</span>
+          <span id="timer">00:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIONES -->
+  <div class="toast" id="toast"></div>
+
+  <!-- OVERLAY DE VICTORIA -->
+  <div class="overlay" id="winOverlay">
+    <div class="modal">
+      <h2>¡Sopa Resuelta!</h2>
+      <p id="winStats"></p>
+      <button class="btn primary" id="winReplayBtn">Jugar otra partida</button>
+    </div>
+  </div>
+
+  <!-- DIALOGO DE CONFIRMACION -->
+  <div class="overlay" id="confirmOverlay">
+    <div class="modal">
+      <h2 id="confirmTitle">¿Confirmar acción?</h2>
+      <p id="confirmDesc">Se perderá el progreso de la partida actual.</p>
+      <div class="row-line" style="margin-top: 18px;">
+        <button class="btn" id="confirmCancelBtn">Cancelar</button>
+        <button class="btn primary" id="confirmOkBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
