@@ -76,19 +76,26 @@ function tryGenerateBoard(
   difficulty: string
 ): WordSearchBoard | null {
   // 1. Filter dictionary
-  const pool = SPANISH_WORDS.filter(w => w.length >= 4 && w.length <= size);
+  const pool = SPANISH_WORDS.map(w => cleanWord(w)).filter(w => w.length >= 4 && w.length <= size);
   if (pool.length < wordCount) return null;
 
   // 2. Select N random words deterministically
   const selectedWords: string[] = [];
   const usedIndices = new Set<number>();
-  while (selectedWords.length < wordCount) {
+  let pickAttempts = 0;
+  while (selectedWords.length < wordCount && pickAttempts < 2000) {
+    pickAttempts++;
     const idx = Math.floor(prng() * pool.length);
-    if (!usedIndices.has(idx)) {
+    if (usedIndices.has(idx)) continue;
+
+    const candidate = pool[idx];
+    const hasConflict = selectedWords.some(w => w.includes(candidate) || candidate.includes(w));
+    if (!hasConflict) {
       usedIndices.add(idx);
-      selectedWords.push(pool[idx]);
+      selectedWords.push(candidate);
     }
   }
+  if (selectedWords.length < wordCount) return null;
 
   // 3. Sort descending by length to make placement easier
   selectedWords.sort((a, b) => b.length - a.length);

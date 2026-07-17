@@ -3,6 +3,18 @@ import { SPANISH_WORDS } from './words';
 
 function testGenerator() {
   console.log('Testing board generator...');
+
+  const verifyNoSubstrings = (words: string[]) => {
+    for (let i = 0; i < words.length; i++) {
+      for (let j = 0; j < words.length; j++) {
+        if (i === j) continue;
+        if (words[i].includes(words[j])) {
+          throw new Error(`Substring conflict found: "${words[j]}" is a substring of "${words[i]}" in word list [${words.join(', ')}]`);
+        }
+      }
+    }
+  };
+
   const b1 = generateWordSearch('medio', 'sourceplay');
   const b2 = generateWordSearch('medio', 'sourceplay');
 
@@ -10,12 +22,14 @@ function testGenerator() {
   if (JSON.stringify(b1.grid) !== JSON.stringify(b2.grid)) {
     throw new Error('Determinism check failed: boards generated from the same seed differ!');
   }
+  verifyNoSubstrings(b1.words);
 
   // Test distinct word lists
   const b3 = generateWordSearch('medio', 'anotherseed');
   if (JSON.stringify(b1.words) === JSON.stringify(b3.words)) {
     throw new Error('Word variety check failed: same words picked for different seeds!');
   }
+  verifyNoSubstrings(b3.words);
 
   // Verify word counts
   if (b1.words.length !== 10) {
@@ -43,6 +57,7 @@ function testGenerator() {
     if (board.words.length !== diff.expectedWordCount) {
       throw new Error(`Difficulty ${diff.name} expected ${diff.expectedWordCount} words, got ${board.words.length}`);
     }
+    verifyNoSubstrings(board.words);
     console.log(`Difficulty '${diff.name}' checked: grid ${diff.expectedSize}x${diff.expectedSize}, words: ${diff.expectedWordCount}`);
   }
 
@@ -58,6 +73,7 @@ function testGenerator() {
     if (!board.words.includes('RADAR') || !board.words.includes('ELLE')) {
       throw new Error('Test setup error: RADAR or ELLE not selected');
     }
+    verifyNoSubstrings(board.words);
     console.log('Palindrome board generated successfully with words:', board.words.join(', '));
   } finally {
     SPANISH_WORDS.length = 0;
