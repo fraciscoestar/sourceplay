@@ -6,7 +6,7 @@ function getRootUrl(): string {
   if (isLocalhost && window.location.port !== '5173') {
     return 'http://localhost:5173/';
   }
-  return '/';
+  return '../../';
 }
 
 export function createHeader(options: { showBackButton: boolean }): void {
