@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="sp-no-transition">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apaga las Luces — SourcePlay</title>
-  <link rel="stylesheet" href="/src/style.css">
+  <link class="game-stylesheet" rel="stylesheet" href="/src/style.css">
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var themeParam = params.get('theme');
+        if (themeParam === 'dark' || themeParam === 'light') {
+          localStorage.setItem('sourceplay-theme', themeParam);
+        }
+      } catch (e) {}
+      var savedTheme = localStorage.getItem('sourceplay-theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+        document.documentElement.classList.remove('light-theme');
+        document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.documentElement.classList.add('light-theme');
+        document.documentElement.classList.remove('dark-theme');
+        document.documentElement.style.colorScheme = 'light';
+      }
+    })();
+  </script>
   <script type="module">
     import { initTheme } from '@sourceplay/shared';
     initTheme();
@@ -12,8 +34,126 @@
 </head>
 <body>
   <div class="app">
-    <h1>Apaga las Luces</h1>
+    <!-- INICIO MENU -->
+    <div id="startMenu" class="view">
+      <header class="game-local-header">
+        <h1>Apaga las Luces</h1>
+        <p class="menu-subtitle">Conmuta las celdas hasta apagarlas todas</p>
+      </header>
+
+      <div class="menu-content">
+        <div class="diff-vertical-grid" id="menuDiffGrid"></div>
+
+        <div class="seed-section">
+          <span class="seed-label">Semilla personalizada (opcional):</span>
+          <input type="text" id="menuSeedInput" placeholder="Escribe una semilla propia…">
+        </div>
+
+        <button class="btn primary bold-btn" id="startGameBtn">Empezar Partida</button>
+      </div>
+    </div>
+
+    <!-- PLAY AREA -->
+    <div id="gameArea" class="view hidden">
+      <header class="game-local-header">
+        <h1>Apaga las Luces</h1>
+      </header>
+
+      <div class="ticket">
+        <span>Semilla&nbsp;<b id="seedLabel">—</b></span>
+        <span class="diff-tag" id="diffTag">—</span>
+      </div>
+
+      <div class="board-wrap">
+        <div id="board"></div>
+        <div class="loading-veil" id="loadingVeil">Generando tablero…</div>
+      </div>
+
+      <div class="controls">
+        <!-- ACTIONS ROW: Undo, Redo, Save Checkpoint, Load Checkpoint, Hint (rightmost) -->
+        <div class="row-line">
+          <button class="btn icon-btn tooltip" id="undoBtn" disabled data-tooltip="Deshacer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+          </button>
+          <button class="btn icon-btn tooltip" id="redoBtn" disabled data-tooltip="Rehacer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+          </button>
+          <button class="btn icon-btn tooltip" id="createCheckpointBtn" data-tooltip="Crear Checkpoint">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/><line x1="12" x2="12" y1="7" y2="13"/><line x1="9" x2="15" y1="10" y2="10"/></svg>
+          </button>
+          <button class="btn icon-btn tooltip" id="gameLoadCheckpointBtn" data-tooltip="Cargar Checkpoint">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+          <button class="btn icon-btn tooltip" id="hintBtn" data-tooltip="Pista">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+        </div>
+
+        <!-- RESTART / EXIT ROW -->
+        <div class="row-line">
+          <button class="btn primary" id="restartGameBtn">Reiniciar</button>
+          <button class="btn ghost" id="exitToMenuBtn">Salir al menú</button>
+        </div>
+
+        <div class="status-row">
+          <span id="movesLabel">Movimientos: 0</span>
+          <span id="timer">00:00</span>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- NOTIFICATION TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- CREATE CHECKPOINT MODAL -->
+  <div class="overlay" id="createCheckpointOverlay">
+    <div class="modal">
+      <h2>Guardar Partida</h2>
+      <p>Escribe un nombre para este checkpoint (Máximo 3 guardados):</p>
+      <input type="text" id="checkpointNameInput" placeholder="Mi partida guardada..." maxlength="20">
+      <div class="row-line" style="margin-top: 18px;">
+        <button class="btn" id="cancelCreateCheckpointBtn">Cancelar</button>
+        <button class="btn primary" id="saveCheckpointBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOAD CHECKPOINT MODAL -->
+  <div class="overlay" id="loadCheckpointOverlay">
+    <div class="modal" style="max-width: 400px; width: 90%;">
+      <h2>Cargar Partida</h2>
+      <div id="checkpointList"></div>
+      <button class="btn" id="closeLoadCheckpointBtn" style="width: 100%; margin-top: 10px;">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- CONFIRM DIALOG -->
+  <div class="overlay" id="confirmOverlay">
+    <div class="modal">
+      <h2 id="confirmTitle">¿Confirmar acción?</h2>
+      <p id="confirmDesc">Se perderá el progreso de la partida actual.</p>
+      <div class="row-line" style="margin-top: 18px;">
+        <button class="btn" id="confirmCancelBtn">Cancelar</button>
+        <button class="btn primary" id="confirmOkBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN SCREEN -->
+  <div class="overlay" id="winOverlay">
+    <div class="modal">
+      <h2>¡Resuelto!</h2>
+      <p id="winStats"></p>
+      <p id="winOptimalStats" style="font-size: 11.5px; margin-top: 6px;"></p>
+      <div class="row-line" style="margin-top: 18px; flex-direction: column; gap: 8px;">
+        <button class="btn primary" id="winRestartBtn" style="margin-top: 0; width: 100%;">Reiniciar Partida</button>
+        <button class="btn primary" id="winReplayBtn" style="margin-top: 0; width: 100%;">Nueva Partida</button>
+        <button class="btn ghost" id="winHomeBtn" style="margin-top: 0; width: 100%;">Menú Principal</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
