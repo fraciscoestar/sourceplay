@@ -1,0 +1,265 @@
+# Review package: 70a8eb1..8b183bb
+
+## Commits
+8b183bb feat: scaffold wordsearch package and configure monorepo build
+
+
+## Files changed
+ package-lock.json                  | 16 ++++++++++++++++
+ package.json                       |  3 ++-
+ packages/wordsearch/index.html     | 16 ++++++++++++++++
+ packages/wordsearch/package.json   | 13 +++++++++++++
+ packages/wordsearch/src/main.ts    |  5 +++++
+ packages/wordsearch/src/style.css  |  1 +
+ packages/wordsearch/tsconfig.json  |  7 +++++++
+ packages/wordsearch/vite.config.ts |  7 +++++++
+ scripts/assemble-build.js          | 10 ++++++++++
+ 9 files changed, 77 insertions(+), 1 deletion(-)
+
+
+## Diff
+diff --git a/package-lock.json b/package-lock.json
+index 33e2bfa..84f3b2e 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -726,20 +726,24 @@
+       "link": true
+     },
+     "node_modules/@sourceplay/shared": {
+       "resolved": "packages/shared",
+       "link": true
+     },
+     "node_modules/@sourceplay/sudoku": {
+       "resolved": "packages/sudoku",
+       "link": true
+     },
++    "node_modules/@sourceplay/wordsearch": {
++      "resolved": "packages/wordsearch",
++      "link": true
++    },
+     "node_modules/@types/estree": {
+       "version": "1.0.9",
+       "resolved": "https://registry.npmjs.org/@types/estree/-/estree-1.0.9.tgz",
+       "integrity": "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==",
+       "dev": true
+     },
+     "node_modules/ansi-regex": {
+       "version": "6.2.2",
+       "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.2.2.tgz",
+       "integrity": "sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg==",
+@@ -1220,20 +1224,26 @@
+     "packages/shared": {
+       "name": "@sourceplay/shared",
+       "version": "1.0.0"
+     },
+     "packages/sudoku": {
+       "name": "@sourceplay/sudoku",
+       "version": "1.0.0",
+       "dependencies": {
+         "@sourceplay/shared": "*"
+       }
++    },
++    "packages/wordsearch": {
++      "version": "1.0.0",
++      "dependencies": {
++        "@sourceplay/shared": "*"
++      }
+     }
+   },
+   "dependencies": {
+     "@esbuild/aix-ppc64": {
+       "version": "0.21.5",
+       "resolved": "https://registry.npmjs.org/@esbuild/aix-ppc64/-/aix-ppc64-0.21.5.tgz",
+       "integrity": "sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==",
+       "dev": true,
+       "optional": true
+     },
+@@ -1580,20 +1590,26 @@
+     },
+     "@sourceplay/shared": {
+       "version": "file:packages/shared"
+     },
+     "@sourceplay/sudoku": {
+       "version": "file:packages/sudoku",
+       "requires": {
+         "@sourceplay/shared": "*"
+       }
+     },
++    "@sourceplay/wordsearch": {
++      "version": "file:packages/wordsearch",
++      "requires": {
++        "@sourceplay/shared": "*"
++      }
++    },
+     "@types/estree": {
+       "version": "1.0.9",
+       "resolved": "https://registry.npmjs.org/@types/estree/-/estree-1.0.9.tgz",
+       "integrity": "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==",
+       "dev": true
+     },
+     "ansi-regex": {
+       "version": "6.2.2",
+       "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-6.2.2.tgz",
+       "integrity": "sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg==",
+diff --git a/package.json b/package.json
+index 378c974..d10c18d 100644
+--- a/package.json
++++ b/package.json
+@@ -2,23 +2,24 @@
+   "name": "sourceplay-root",
+   "version": "1.0.0",
+   "private": true,
+   "description": "Monorepo de minijuegos SourcePlay",
+   "workspaces": [
+     "apps/*",
+     "packages/*"
+   ],
+   "scripts": {
+     "install:all": "npm install",
+-    "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\"",
++    "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\" \"npm run dev:wordsearch\"",
+     "dev:selector": "npm run dev --workspace=@sourceplay/selector",
+     "dev:sudoku": "npm run dev --workspace=@sourceplay/sudoku",
+     "dev:nonogram": "npm run dev --workspace=@sourceplay/nonogram",
++    "dev:wordsearch": "npm run dev --workspace=@sourceplay/wordsearch",
+     "build:all": "npm run build --workspaces --if-present && npm run assemble",
+     "assemble": "node scripts/assemble-build.js"
+   },
+   "devDependencies": {
+     "concurrently": "^10.0.3",
+     "typescript": "^5.5.3",
+     "vite": "^5.3.3"
+   }
+ }
+diff --git a/packages/wordsearch/index.html b/packages/wordsearch/index.html
+new file mode 100644
+index 0000000..da50c1b
+--- /dev/null
++++ b/packages/wordsearch/index.html
+@@ -0,0 +1,16 @@
++<!DOCTYPE html>
++<html lang="es">
++<head>
++  <meta charset="UTF-8">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>Sopa de Letras — SourcePlay</title>
++  <script type="module">
++    import { initTheme } from '@sourceplay/shared';
++    initTheme();
++  </script>
++</head>
++<body>
++  <div id="app">Sopa de Letras Scaffold</div>
++  <script type="module" src="/src/main.ts"></script>
++</body>
++</html>
+diff --git a/packages/wordsearch/package.json b/packages/wordsearch/package.json
+new file mode 100644
+index 0000000..3181a0f
+--- /dev/null
++++ b/packages/wordsearch/package.json
+@@ -0,0 +1,13 @@
++{
++  "name": "@sourceplay/wordsearch",
++  "private": true,
++  "version": "1.0.0",
++  "type": "module",
++  "scripts": {
++    "dev": "vite",
++    "build": "tsc && vite build"
++  },
++  "dependencies": {
++    "@sourceplay/shared": "*"
++  }
++}
+diff --git a/packages/wordsearch/src/main.ts b/packages/wordsearch/src/main.ts
+new file mode 100644
+index 0000000..6f44a2a
+--- /dev/null
++++ b/packages/wordsearch/src/main.ts
+@@ -0,0 +1,5 @@
++import { createHeader } from '@sourceplay/shared';
++import './style.css';
++
++createHeader({ showBackButton: true });
++console.log('Wordsearch loaded');
+diff --git a/packages/wordsearch/src/style.css b/packages/wordsearch/src/style.css
+new file mode 100644
+index 0000000..b4b9fe6
+--- /dev/null
++++ b/packages/wordsearch/src/style.css
+@@ -0,0 +1 @@
++@import "@sourceplay/shared/style.css";
+diff --git a/packages/wordsearch/tsconfig.json b/packages/wordsearch/tsconfig.json
+new file mode 100644
+index 0000000..b0405c8
+--- /dev/null
++++ b/packages/wordsearch/tsconfig.json
+@@ -0,0 +1,7 @@
++{
++  "extends": "../../tsconfig.json",
++  "compilerOptions": {
++    "moduleResolution": "node"
++  },
++  "include": ["src/**/*", "vite.config.ts"]
++}
+diff --git a/packages/wordsearch/vite.config.ts b/packages/wordsearch/vite.config.ts
+new file mode 100644
+index 0000000..31d6856
+--- /dev/null
++++ b/packages/wordsearch/vite.config.ts
+@@ -0,0 +1,7 @@
++import { defineConfig } from 'vite';
++
++export default defineConfig({
++  server: {
++    port: 5176
++  }
++});
+diff --git a/scripts/assemble-build.js b/scripts/assemble-build.js
+index 04ecd09..eaabb5f 100644
+--- a/scripts/assemble-build.js
++++ b/scripts/assemble-build.js
+@@ -15,20 +15,22 @@ function copyDirSync(src, dest) {
+       fs.copyFileSync(srcPath, destPath);
+     }
+   }
+ }
+ 
+ const selectorDist = path.join(__dirname, '../apps/selector/dist');
+ const sudokuDist = path.join(__dirname, '../packages/sudoku/dist');
+ const targetSudokuPath = path.join(selectorDist, 'games/sudoku');
+ const nonogramDist = path.join(__dirname, '../packages/nonogram/dist');
+ const targetNonogramPath = path.join(selectorDist, 'games/nonogram');
++const wordsearchDist = path.join(__dirname, '../packages/wordsearch/dist');
++const targetWordsearchPath = path.join(selectorDist, 'games/wordsearch');
+ 
+ console.log('Ensamblando despliegue final de SourcePlay...');
+ 
+ if (!fs.existsSync(selectorDist)) {
+   console.error('Error: Compilación de selector no encontrada. Ejecuta build primero.');
+   process.exit(1);
+ }
+ 
+ if (fs.existsSync(sudokuDist)) {
+   console.log(`Copiando build de Sudoku de ${sudokuDist} a ${targetSudokuPath}...`);
+@@ -39,11 +41,19 @@ if (fs.existsSync(sudokuDist)) {
+ }
+ 
+ if (fs.existsSync(nonogramDist)) {
+   console.log(`Copiando build de Nonograma de ${nonogramDist} a ${targetNonogramPath}...`);
+   copyDirSync(nonogramDist, targetNonogramPath);
+   console.log('¡Nonograma copiado con éxito!');
+ } else {
+   console.warn('Advertencia: Compilación de Nonograma no encontrada.');
+ }
+ 
++if (fs.existsSync(wordsearchDist)) {
++  console.log(`Copiando build de Sopa de letras de ${wordsearchDist} a ${targetWordsearchPath}...`);
++  copyDirSync(wordsearchDist, targetWordsearchPath);
++  console.log('¡Sopa de letras copiada con éxito!');
++} else {
++  console.warn('Advertencia: Compilación de Sopa de letras no encontrada.');
++}
++
+ console.log('Ensamblado completado con éxito.');

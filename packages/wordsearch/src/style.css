@@ -30,6 +30,18 @@ body {
   overflow: hidden;
 }
 
+.view {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-evenly;
+  min-height: 0;
+}
+.view.hidden {
+  display: none !important;
+}
+
 .game-local-header {
   text-align: center;
   margin-bottom: 2px;
@@ -116,6 +128,7 @@ body {
   font-size: 55cqw;
   line-height: 1;
   z-index: 2;
+  pointer-events: none; /* Prevents elementFromPoint resolving the span */
 }
 
 /* Temporary dragging highlight styling */
@@ -229,13 +242,21 @@ body {
   font-family: 'Space Mono', monospace;
   font-weight: 700;
   font-size: 14px;
-  padding: 12px;
+  padding: 12px 18px;
   border: 2px solid var(--ink);
   border-radius: var(--radius);
   background-color: var(--paper);
   color: var(--ink);
   cursor: pointer;
   transition: all 0.15s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.size-hint {
+  font-size: 11px;
+  opacity: 0.7;
+  font-weight: 400;
 }
 .diff-vertical-btn:hover {
   background-color: var(--paper-deep);

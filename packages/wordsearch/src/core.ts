@@ -19,6 +19,20 @@ const DIRECTIONS = [
   { x: -1, y: -1 }  // D Up-Left
 ];
 
+const FORWARD_DIRECTIONS = [
+  { x: 1, y: 0 },   // H Right
+  { x: 0, y: 1 },   // V Down
+  { x: 1, y: 1 }    // D Down-Right
+];
+
+const BACKWARD_DIRECTIONS = [
+  { x: -1, y: 0 },  // H Left
+  { x: 0, y: -1 },  // V Up
+  { x: -1, y: 1 },  // D Down-Left
+  { x: 1, y: -1 },  // D Up-Right
+  { x: -1, y: -1 }  // D Up-Left
+];
+
 export function cleanWord(word: string): string {
   return word
     .toLowerCase()
@@ -30,35 +44,61 @@ export function cleanWord(word: string): string {
     .toUpperCase();
 }
 
+function getDirection(difficulty: string, prng: () => number): { x: number; y: number } {
+  let backwardProb = 0.5;
+  switch (difficulty) {
+    case 'facil':
+      backwardProb = 0.0;
+      break;
+    case 'medio':
+      backwardProb = 0.15;
+      break;
+    case 'dificil':
+      backwardProb = 0.30;
+      break;
+    case 'experto':
+      // Under experto, all 8 directions are equally likely
+      return DIRECTIONS[Math.floor(prng() * DIRECTIONS.length)];
+  }
+
+  if (prng() < backwardProb) {
+    return BACKWARD_DIRECTIONS[Math.floor(prng() * BACKWARD_DIRECTIONS.length)];
+  } else {
+    return FORWARD_DIRECTIONS[Math.floor(prng() * FORWARD_DIRECTIONS.length)];
+  }
+}
+
 export function generateWordSearch(difficulty: string, seedStr: string): WordSearchBoard {
-  let size = 13;
-  let wordCount = 10;
+  let size = 10;
+  let wordCount = 8;
 
   switch (difficulty) {
     case 'facil':
-      size = 10;
-      wordCount = 7;
+      size = 7;
+      wordCount = 6;
       break;
     case 'medio':
-      size = 13;
-      wordCount = 10;
+      size = 10;
+      wordCount = 8;
       break;
     case 'dificil':
-      size = 16;
-      wordCount = 14;
+      size = 13;
+      wordCount = 11;
       break;
     case 'experto':
-      size = 20;
-      wordCount = 19;
+      size = 16;
+      wordCount = 14;
       break;
   }
 
   const numericSeed = parseSeed(seedStr);
   let attempt = 0;
 
+  const pool = SPANISH_WORDS.filter(w => w.length >= 4 && w.length <= size);
+
   while (attempt < 1000) {
     const prng = mulberry32(numericSeed + attempt);
-    const board = tryGenerateBoard(size, wordCount, prng, seedStr, difficulty);
+    const board = tryGenerateBoard(size, wordCount, prng, seedStr, difficulty, pool);
     if (board) {
       return board;
     }
@@ -73,10 +113,10 @@ function tryGenerateBoard(
   wordCount: number,
   prng: () => number,
   seedStr: string,
-  difficulty: string
+  difficulty: string,
+  pool: string[]
 ): WordSearchBoard | null {
   // 1. Filter dictionary
-  const pool = SPANISH_WORDS.map(w => cleanWord(w)).filter(w => w.length >= 4 && w.length <= size);
   if (pool.length < wordCount) return null;
 
   // 2. Select N random words deterministically
@@ -110,7 +150,7 @@ function tryGenerateBoard(
     for (let pTry = 0; pTry < 500; pTry++) {
       const startX = Math.floor(prng() * size);
       const startY = Math.floor(prng() * size);
-      const dir = DIRECTIONS[Math.floor(prng() * DIRECTIONS.length)];
+      const dir = getDirection(difficulty, prng);
 
       if (canPlaceWord(grid, word, startX, startY, dir, size)) {
         placeWord(grid, word, startX, startY, dir);

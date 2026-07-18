@@ -1,0 +1,49 @@
+# Review package: b3c7ce1..31ca52c
+
+## Commits
+31ca52c feat: register wordsearch game in selector launcher and add cover asset
+
+
+## Files changed
+ apps/selector/public/assets/covers/wordsearch.jpg | Bin 0 -> 815744 bytes
+ apps/selector/src/main.ts                         |   7 +++++++
+ 2 files changed, 7 insertions(+)
+
+
+## Diff
+diff --git a/apps/selector/public/assets/covers/wordsearch.jpg b/apps/selector/public/assets/covers/wordsearch.jpg
+new file mode 100644
+index 0000000..0a101de
+Binary files /dev/null and b/apps/selector/public/assets/covers/wordsearch.jpg differ
+diff --git a/apps/selector/src/main.ts b/apps/selector/src/main.ts
+index 4cf270a..3ee5cf1 100644
+--- a/apps/selector/src/main.ts
++++ b/apps/selector/src/main.ts
+@@ -16,20 +16,27 @@ const GAMES_REGISTRY: GameInfo[] = [
+     description: 'Resuelve sudokus clásicos con semillas personalizadas y cuatro niveles de dificultad.',
+     url: import.meta.env.DEV ? 'http://localhost:5174/' : './games/sudoku/index.html',
+     imageUrl: './assets/covers/sudoku.jpg'
+   },
+   {
+     id: 'nonogram',
+     title: 'Nonograma',
+     description: 'Descubre el patrón oculto usando las pistas numéricas de filas y columnas. Cuatro tamaños disponibles.',
+     url: import.meta.env.DEV ? 'http://localhost:5175/' : './games/nonogram/index.html',
+     imageUrl: './assets/covers/nonogram.jpg'
++  },
++  {
++    id: 'wordsearch',
++    title: 'Sopa de letras',
++    description: 'Encuentra las palabras ocultas en la cuadrícula en horizontal, vertical o diagonal.',
++    url: import.meta.env.DEV ? 'http://localhost:5176/' : './games/wordsearch/index.html',
++    imageUrl: './assets/covers/wordsearch.jpg'
+   }
+ ];
+ 
+ function initSelector(): void {
+   // Inyectar cabecera global compartida sin botón de retroceso
+   createHeader({ showBackButton: false });
+ 
+   const grid = document.getElementById('gamesGrid');
+   if (!grid) return;
+ 

@@ -5,10 +5,10 @@ import './style.css';
 
 // Constants
 const DIFFICULTIES: Record<string, { label: string; size: number }> = {
-  facil: { label: 'Fácil', size: 10 },
-  medio: { label: 'Medio', size: 13 },
-  dificil: { label: 'Difícil', size: 16 },
-  experto: { label: 'Experto', size: 20 }
+  facil: { label: 'Fácil', size: 7 },
+  medio: { label: 'Medio', size: 10 },
+  dificil: { label: 'Difícil', size: 13 },
+  experto: { label: 'Experto', size: 16 }
 };
 const DIFFICULTY_ORDER = ['facil', 'medio', 'dificil', 'experto'];
 
@@ -61,7 +61,7 @@ function initMenu(): void {
   DIFFICULTY_ORDER.forEach((key) => {
     const btn = document.createElement('button');
     btn.className = 'diff-vertical-btn';
-    btn.textContent = DIFFICULTIES[key].label;
+    btn.innerHTML = `${DIFFICULTIES[key].label} <span class="size-hint">${DIFFICULTIES[key].size}x${DIFFICULTIES[key].size}</span>`;
     btn.dataset.key = key;
     if (key === currentDifficulty) btn.classList.add('active');
     
@@ -119,6 +119,17 @@ function setupGame(difficulty: string, seed: string): void {
   elapsedTime = 0;
   timerEl.textContent = '00:00';
   startTimer();
+
+  // Reset selection state
+  startCell = null;
+  currentCell = null;
+  isDragging = false;
+
+  const cells = boardEl.querySelectorAll('.cell');
+  cells.forEach(c => {
+    c.classList.remove('start-cell');
+    c.classList.remove('selecting');
+  });
 
   seedLabelEl.textContent = seed;
   diffTagEl.textContent = DIFFICULTIES[difficulty].label;
@@ -402,6 +413,19 @@ boardEl.addEventListener('touchmove', (e) => {
 
 window.addEventListener('pointerup', handleEnd);
 window.addEventListener('pointercancel', handleEnd);
+
+window.addEventListener('click', (e) => {
+  const target = e.target as HTMLElement;
+  if (!target.closest('#board') && !target.closest('.diff-vertical-btn') && !target.closest('.btn') && !target.closest('#menuSeedInput')) {
+    startCell = null;
+    currentCell = null;
+    const cells = boardEl.querySelectorAll('.cell');
+    cells.forEach(c => {
+      c.classList.remove('start-cell');
+      c.classList.remove('selecting');
+    });
+  }
+});
 
 // Run menu init
 initMenu();

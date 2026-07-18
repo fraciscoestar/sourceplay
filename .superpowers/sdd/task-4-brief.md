@@ -1,0 +1,459 @@
+### Task 4: UI layout & Styles
+
+**Files:**
+- Modify: `packages/wordsearch/index.html`
+- Modify: `packages/wordsearch/src/style.css`
+
+**Interfaces:**
+- Produces: HTML structure and CSS layouts that adapt automatically to variables and screen sizes, mirroring Sudoku.
+
+- [ ] **Step 1: Write index.html structure**
+  Replace contents of `packages/wordsearch/index.html`:
+  ```html
+  <!DOCTYPE html>
+  <html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sopa de Letras — SourcePlay</title>
+    <script type="module">
+      import { initTheme } from '@sourceplay/shared';
+      initTheme();
+    </script>
+  </head>
+  <body>
+    <div class="app">
+      <!-- MENÚ DE INICIO -->
+      <div id="startMenu" class="view">
+        <header class="game-local-header">
+          <h1>Sopa de Letras</h1>
+          <p class="menu-subtitle">Selecciona una dificultad para jugar</p>
+        </header>
+
+        <div class="menu-content">
+          <div class="diff-vertical-grid" id="menuDiffGrid"></div>
+          
+          <div class="seed-section">
+            <span class="seed-label">Semilla personalizada (opcional):</span>
+            <input type="text" id="menuSeedInput" placeholder="Escribe una semilla propia…">
+          </div>
+
+          <button class="btn primary bold-btn" id="startGameBtn">Empezar Partida</button>
+        </div>
+      </div>
+
+      <!-- PANTALLA DE JUEGO (Oculta por defecto) -->
+      <div id="gameArea" class="view hidden">
+        <header class="game-local-header">
+          <h1>Sopa de Letras</h1>
+        </header>
+
+        <div class="ticket">
+          <span>Semilla&nbsp;<b id="seedLabel">—</b></span>
+          <span class="diff-tag" id="diffTag">—</span>
+        </div>
+
+        <div class="board-wrap">
+          <div id="board"></div>
+        </div>
+
+        <div class="controls">
+          <!-- LISTADO DE PALABRAS -->
+          <div class="word-list-container">
+            <h3>Palabras a buscar:</h3>
+            <div id="wordList" class="word-list"></div>
+          </div>
+
+          <!-- CONTROLES DE SALIDA / REINICIO -->
+          <div class="row-line">
+            <button class="btn primary" id="restartGameBtn">Reiniciar</button>
+            <button class="btn ghost" id="exitToMenuBtn">Salir al menú</button>
+          </div>
+
+          <div class="status-row">
+            <span id="progressLabel">0 / 0</span>
+            <span id="timer">00:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICACIONES -->
+    <div class="toast" id="toast"></div>
+
+    <!-- OVERLAY DE VICTORIA -->
+    <div class="overlay" id="winOverlay">
+      <div class="modal">
+        <h2>¡Sopa Resuelta!</h2>
+        <p id="winStats"></p>
+        <button class="btn primary" id="winReplayBtn">Jugar otra partida</button>
+      </div>
+    </div>
+
+    <!-- DIALOGO DE CONFIRMACION -->
+    <div class="overlay" id="confirmOverlay">
+      <div class="modal">
+        <h2 id="confirmTitle">¿Confirmar acción?</h2>
+        <p id="confirmDesc">Se perderá el progreso de la partida actual.</p>
+        <div class="row-line" style="margin-top: 18px;">
+          <button class="btn" id="confirmCancelBtn">Cancelar</button>
+          <button class="btn primary" id="confirmOkBtn">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+  </html>
+  ```
+
+- [ ] **Step 2: Add CSS stylesheet matching Sudoku styling**
+  Replace contents of `packages/wordsearch/src/style.css`:
+  ```css
+  @import "@sourceplay/shared/style.css";
+
+  html, body {
+    overflow: hidden;
+    height: 100%;
+  }
+
+  body {
+    background:
+      repeating-linear-gradient(0deg, rgba(33,31,26,0.035) 0px, rgba(33,31,26,0.035) 1px, transparent 1px, transparent 28px),
+      repeating-linear-gradient(90deg, rgba(33,31,26,0.035) 0px, rgba(33,31,26,0.035) 1px, transparent 1px, transparent 28px),
+      var(--paper);
+    color: var(--ink);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 440px;
+    padding: 0 14px;
+    height: calc(100dvh - 76px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .game-local-header {
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .game-local-header h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(24px, 5.5vh, 32px);
+    margin: 0;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    transition: color 0.25s ease;
+  }
+  .menu-subtitle {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .ticket {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--paper-deep);
+    border: 1.5px dashed var(--ink-soft);
+    border-radius: 4px;
+    padding: 5px 12px;
+    margin: 4px 0 6px;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+  .ticket b {
+    color: var(--teal-deep);
+    transition: color 0.25s ease;
+  }
+  .ticket .diff-tag {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  .board-wrap {
+    position: relative;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 4px;
+    padding: 4px;
+    box-shadow: 0 4px 0 -2px rgba(33,31,26,0.12);
+    width: 100%;
+    max-width: min(100%, 39vh);
+    aspect-ratio: 1;
+    margin: 0 auto;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+  #board {
+    display: grid;
+    width: 100%;
+    aspect-ratio: 1;
+    user-select: none;
+    touch-action: none; /* Crucial for custom touch dragging drag select */
+  }
+  .cell {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    -webkit-tap-highlight-color: transparent;
+    container-type: inline-size;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  .cell .letter {
+    font-size: 55cqw;
+    line-height: 1;
+    z-index: 2;
+  }
+
+  /* Temporary dragging highlight styling */
+  .cell.selecting {
+    background-color: var(--amber-soft);
+  }
+
+  /* Found words highlight styling */
+  .cell.selected-word {
+    background-color: var(--same);
+    color: var(--teal-deep);
+  }
+  .cell.start-cell {
+    background-color: var(--amber);
+    color: var(--ink);
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  .word-list-container {
+    background: var(--paper-deep);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    max-height: 14vh;
+    overflow-y: auto;
+  }
+  .word-list-container h3 {
+    margin: 0 0 6px 0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .word-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 12px;
+  }
+  .word-item {
+    font-weight: 700;
+    transition: color 0.25s, text-decoration 0.25s;
+  }
+  .word-item.found {
+    text-decoration: line-through;
+    color: var(--ink-soft);
+    opacity: 0.6;
+  }
+
+  /* Buttons & Row layouts */
+  .row-line {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+  .btn {
+    flex: 1;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 16px;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.15s, color 0.15s, transform 0.05s;
+  }
+  .btn:hover {
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn.primary {
+    background-color: var(--teal);
+    color: var(--paper);
+  }
+  .btn.primary:hover {
+    background-color: var(--teal-deep);
+  }
+  .btn.ghost {
+    background-color: transparent;
+    border-color: transparent;
+  }
+  .btn.ghost:hover {
+    background-color: rgba(33,31,26,0.06);
+    color: var(--ink);
+  }
+
+  .menu-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .diff-vertical-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .diff-vertical-btn {
+    width: 100%;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .diff-vertical-btn:hover {
+    background-color: var(--paper-deep);
+  }
+  .diff-vertical-btn.active {
+    background-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .seed-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .seed-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+  .seed-section input {
+    font-family: 'Space Mono', monospace;
+    padding: 10px;
+    border: 2px solid var(--ink);
+    border-radius: var(--radius);
+    background-color: var(--paper);
+    color: var(--ink);
+  }
+
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    padding: 2px 4px;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  /* MODALS & OVERLAYS */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(33, 31, 26, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 6px;
+    padding: 20px;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 8px 0 -2px rgba(33, 31, 26, 0.2);
+    text-align: center;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+  }
+  .overlay.show .modal {
+    transform: scale(1);
+  }
+  .modal h2 {
+    font-family: 'Fraunces', serif;
+    margin: 0 0 10px 0;
+    font-size: 24px;
+  }
+  .modal p {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 0 0 16px 0;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 10000;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  ```
+
+---
