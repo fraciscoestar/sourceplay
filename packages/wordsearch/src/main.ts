@@ -5,10 +5,10 @@ import './style.css';
 
 // Constants
 const DIFFICULTIES: Record<string, { label: string; size: number }> = {
-  facil: { label: 'Fácil', size: 7 },
+  facil: { label: 'Fácil', size: 8 },
   medio: { label: 'Medio', size: 10 },
-  dificil: { label: 'Difícil', size: 13 },
-  experto: { label: 'Experto', size: 16 }
+  dificil: { label: 'Difícil', size: 12 },
+  experto: { label: 'Experto', size: 14 }
 };
 const DIFFICULTY_ORDER = ['facil', 'medio', 'dificil', 'experto'];
 

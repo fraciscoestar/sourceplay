@@ -32,16 +32,16 @@ function testGenerator() {
   verifyNoSubstrings(b3.words);
 
   // Verify word counts
-  if (b1.words.length !== 8) {
-    throw new Error(`Expected 8 words, got ${b1.words.length}`);
+  if (b1.words.length !== 7) {
+    throw new Error(`Expected 7 words, got ${b1.words.length}`);
   }
 
   // Verify all difficulty levels
   const difficulties = [
-    { name: 'facil', expectedSize: 7, expectedWordCount: 6 },
-    { name: 'medio', expectedSize: 10, expectedWordCount: 8 },
-    { name: 'dificil', expectedSize: 13, expectedWordCount: 11 },
-    { name: 'experto', expectedSize: 16, expectedWordCount: 14 }
+    { name: 'facil', expectedSize: 8, expectedWordCount: 5 },
+    { name: 'medio', expectedSize: 10, expectedWordCount: 7 },
+    { name: 'dificil', expectedSize: 12, expectedWordCount: 8 },
+    { name: 'experto', expectedSize: 14, expectedWordCount: 10 }
   ];
 
   for (const diff of difficulties) {

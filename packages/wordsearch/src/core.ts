@@ -70,24 +70,24 @@ function getDirection(difficulty: string, prng: () => number): { x: number; y: n
 
 export function generateWordSearch(difficulty: string, seedStr: string): WordSearchBoard {
   let size = 10;
-  let wordCount = 8;
+  let wordCount = 7;
 
   switch (difficulty) {
     case 'facil':
-      size = 7;
-      wordCount = 6;
+      size = 8;
+      wordCount = 5;
       break;
     case 'medio':
       size = 10;
-      wordCount = 8;
+      wordCount = 7;
       break;
     case 'dificil':
-      size = 13;
-      wordCount = 11;
+      size = 12;
+      wordCount = 8;
       break;
     case 'experto':
-      size = 16;
-      wordCount = 14;
+      size = 14;
+      wordCount = 10;
       break;
   }
 
@@ -144,6 +144,7 @@ function tryGenerateBoard(
   const grid: string[][] = Array.from({ length: size }, () => Array(size).fill(''));
 
   // 5. Place words
+  const placedDirections: { x: number; y: number }[] = [];
   for (const word of selectedWords) {
     let placed = false;
     // Try up to 500 times to place the word
@@ -154,11 +155,25 @@ function tryGenerateBoard(
 
       if (canPlaceWord(grid, word, startX, startY, dir, size)) {
         placeWord(grid, word, startX, startY, dir);
+        placedDirections.push(dir);
         placed = true;
         break;
       }
     }
     if (!placed) return null; // placement failed, discard grid
+  }
+
+  // 5.5 Validate that there is at least one horizontal, vertical, and diagonal word
+  let hasH = false;
+  let hasV = false;
+  let hasD = false;
+  for (const d of placedDirections) {
+    if (d.y === 0) hasH = true;
+    else if (d.x === 0) hasV = true;
+    else hasD = true;
+  }
+  if (!hasH || !hasV || !hasD) {
+    return null; // Discard grid and try again to ensure a mix of directions
   }
 
   // 6. Fill empty cells with random letters matching Spanish frequencies
