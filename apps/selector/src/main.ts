@@ -1,5 +1,4 @@
 import { createHeader } from '@sourceplay/shared';
-import './style.css';
 
 interface GameInfo {
   id: string;
@@ -30,6 +29,20 @@ const GAMES_REGISTRY: GameInfo[] = [
     description: 'Encuentra las palabras ocultas en la cuadrícula en horizontal, vertical o diagonal.',
     url: import.meta.env.DEV ? 'http://localhost:5176/' : './games/wordsearch/index.html',
     imageUrl: './assets/covers/wordsearch.jpg'
+  },
+  {
+    id: 'sliding-puzzle',
+    title: 'Rompecabezas',
+    description: 'Desliza las fichas numéricas al espacio vacío para ordenarlas. Cuatro dificultades.',
+    url: import.meta.env.DEV ? 'http://localhost:5177/' : './games/sliding-puzzle/index.html',
+    imageUrl: './assets/covers/sliding-puzzle.jpg'
+  },
+  {
+    id: 'lights-out',
+    title: 'Apaga las Luces',
+    description: 'Conmuta las luces de la cuadrícula hasta apagarlas todas en el menor número de movimientos.',
+    url: import.meta.env.DEV ? 'http://localhost:5178/' : './games/lights-out/index.html',
+    imageUrl: './assets/covers/lights-out.jpg'
   }
 ];
 

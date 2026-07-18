@@ -9,11 +9,13 @@
   ],
   "scripts": {
     "install:all": "npm install",
-    "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\" \"npm run dev:wordsearch\"",
+    "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\" \"npm run dev:wordsearch\" \"npm run dev:sliding-puzzle\" \"npm run dev:lights-out\"",
     "dev:selector": "npm run dev --workspace=@sourceplay/selector",
     "dev:sudoku": "npm run dev --workspace=@sourceplay/sudoku",
     "dev:nonogram": "npm run dev --workspace=@sourceplay/nonogram",
     "dev:wordsearch": "npm run dev --workspace=@sourceplay/wordsearch",
+    "dev:sliding-puzzle": "npm run dev --workspace=@sourceplay/sliding-puzzle",
+    "dev:lights-out": "npm run dev --workspace=@sourceplay/lights-out",
     "build:all": "npm run build --workspaces --if-present && npm run assemble",
     "assemble": "node scripts/assemble-build.js"
   },

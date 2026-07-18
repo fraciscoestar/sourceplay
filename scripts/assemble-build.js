@@ -56,4 +56,26 @@ if (fs.existsSync(wordsearchDist)) {
   console.warn('Advertencia: Compilación de Sopa de letras no encontrada.');
 }
 
+const slidingPuzzleDist = path.join(__dirname, '../packages/sliding-puzzle/dist');
+const targetSlidingPuzzlePath = path.join(selectorDist, 'games/sliding-puzzle');
+
+if (fs.existsSync(slidingPuzzleDist)) {
+  console.log(`Copiando build de Rompecabezas de ${slidingPuzzleDist} a ${targetSlidingPuzzlePath}...`);
+  copyDirSync(slidingPuzzleDist, targetSlidingPuzzlePath);
+  console.log('¡Rompecabezas copiado con éxito!');
+} else {
+  console.warn('Advertencia: Compilación de Rompecabezas no encontrada.');
+}
+
+const lightsOutDist = path.join(__dirname, '../packages/lights-out/dist');
+const targetLightsOutPath = path.join(selectorDist, 'games/lights-out');
+
+if (fs.existsSync(lightsOutDist)) {
+  console.log(`Copiando build de Apaga las Luces de ${lightsOutDist} a ${targetLightsOutPath}...`);
+  copyDirSync(lightsOutDist, targetLightsOutPath);
+  console.log('¡Apaga las Luces copiado con éxito!');
+} else {
+  console.warn('Advertencia: Compilación de Apaga las Luces no encontrada.');
+}
+
 console.log('Ensamblado completado con éxito.');
