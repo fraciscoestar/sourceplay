@@ -2,58 +2,51 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const base = process.argv[2];
-const head = process.argv[3];
-let outFile = process.argv[4];
-
-if (!base || !head) {
+if (process.argv.length < 4) {
   console.error("Usage: node review-package.js BASE HEAD [OUTFILE]");
   process.exit(1);
 }
 
-try {
-  execSync(`git rev-parse --verify --quiet ${base}`, { stdio: 'ignore' });
-} catch (e) {
-  console.error(`bad BASE: ${base}`);
-  process.exit(1);
+const base = process.argv[2];
+const head = process.argv[3];
+let outFile = process.argv[4];
+
+function runGit(cmd) {
+  try {
+    return execSync(cmd, { encoding: 'utf8' }).trim();
+  } catch (e) {
+    console.error(`Git command failed: ${cmd}\nError: ${e.message}`);
+    process.exit(1);
+  }
 }
 
-try {
-  execSync(`git rev-parse --verify --quiet ${head}`, { stdio: 'ignore' });
-} catch (e) {
-  console.error(`bad HEAD: ${head}`);
-  process.exit(1);
-}
+// Verify base and head
+runGit(`git rev-parse --verify --quiet ${base}`);
+runGit(`git rev-parse --verify --quiet ${head}`);
 
-const shortBase = execSync(`git rev-parse --short ${base}`).toString().trim();
-const shortHead = execSync(`git rev-parse --short ${head}`).toString().trim();
+const baseShort = runGit(`git rev-parse --short ${base}`);
+const headShort = runGit(`git rev-parse --short ${head}`);
 
 if (!outFile) {
-  const root = path.resolve(__dirname, '..');
-  const sddDir = path.join(root, '.superpowers', 'sdd');
-  if (!fs.existsSync(sddDir)) {
-    fs.mkdirSync(sddDir, { recursive: true });
-  }
-  outFile = path.join(sddDir, `review-${shortBase}..${shortHead}.diff`);
+  const repoRoot = path.join(__dirname, '..');
+  const sddDir = path.join(repoRoot, '.superpowers', 'sdd');
+  fs.mkdirSync(sddDir, { recursive: true });
+  outFile = path.join(sddDir, `review-${baseShort}..${headShort}.diff`);
+} else {
+  fs.mkdirSync(path.dirname(outFile), { recursive: true });
 }
 
-const commits = execSync(`git log --oneline ${base}..${head}`).toString();
-const stat = execSync(`git diff --stat ${base}..${head}`).toString();
-const diff = execSync(`git diff -U10 ${base}..${head}`).toString();
-const commitCount = execSync(`git rev-list --count ${base}..${head}`).toString().trim();
+let output = [];
+output.push(`# Review package: ${base}..${head}\n`);
+output.push("## Commits");
+output.push(runGit(`git log --oneline ${base}..${head}`));
+output.push("\n## Files changed");
+output.push(runGit(`git diff --stat ${base}..${head}`));
+output.push("\n## Diff");
+output.push(runGit(`git diff -U10 ${base}..${head}`));
 
-const output = [
-  `# Review package: ${base}..${head}`,
-  '',
-  '## Commits',
-  commits,
-  '',
-  '## Files changed',
-  stat,
-  '',
-  '## Diff',
-  diff
-].join('\n');
+fs.writeFileSync(outFile, output.join('\n'), 'utf8');
 
-fs.writeFileSync(outFile, output);
-console.log(`wrote ${outFile}: ${commitCount} commit(s), ${output.length} bytes`);
+const commitCount = runGit(`git rev-list --count ${base}..${head}`);
+const stats = fs.statSync(outFile);
+console.log(`wrote ${outFile}: ${commitCount} commit(s), ${stats.size} bytes`);
