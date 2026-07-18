@@ -85,6 +85,15 @@ let winRestartBtnEl: HTMLButtonElement;
 let winReplayBtnEl: HTMLButtonElement;
 let winHomeBtnEl: HTMLButtonElement;
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function initGame(): void {
   createHeader({ showBackButton: true });
 
@@ -174,13 +183,13 @@ function hideConfirmModal(): void {
 }
 
 function startTimer(): void {
-  if (timerInterval) clearInterval(timerInterval);
+  if (timerInterval !== null) clearInterval(timerInterval);
   state!.startTime = Date.now();
   timerInterval = window.setInterval(updateTimerDisplay, 1000);
 }
 
 function stopTimer(): void {
-  if (timerInterval) {
+  if (timerInterval !== null) {
     clearInterval(timerInterval);
     timerInterval = null;
   }
@@ -445,7 +454,7 @@ function openLoadCheckpointModal(): void {
     card.className = 'checkpoint-card';
     card.innerHTML = `
       <div class="checkpoint-card-header">
-        <span class="checkpoint-card-name">${cp.name}</span>
+        <span class="checkpoint-card-name">${escapeHtml(cp.name)}</span>
         <span class="checkpoint-card-date">${cp.dateStr}</span>
       </div>
       <div class="checkpoint-card-details">
@@ -648,6 +657,7 @@ function setupEventListeners(): void {
   // Keyboard shortcuts (Ctrl+Z, Ctrl+Y)
   document.addEventListener('keydown', (e) => {
     if (!state || state.solved) return;
+    if (document.querySelector('.overlay.show') !== null) return;
     if (document.activeElement?.tagName === 'INPUT') return;
 
     if (e.ctrlKey && e.key.toLowerCase() === 'z') {
