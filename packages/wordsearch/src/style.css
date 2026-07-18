@@ -131,15 +131,16 @@ body {
   pointer-events: none; /* Prevents elementFromPoint resolving the span */
 }
 
-/* Temporary dragging highlight styling */
-.cell.selecting {
-  background-color: var(--amber-soft);
-}
-
 /* Found words highlight styling */
 .cell.selected-word {
   background-color: var(--same);
   color: var(--teal-deep);
+}
+
+/* Temporary dragging highlight styling */
+.cell.selecting {
+  background-color: var(--amber-soft);
+  color: var(--ink);
 }
 .cell.start-cell {
   background-color: var(--amber);
