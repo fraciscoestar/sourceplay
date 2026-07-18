@@ -126,3 +126,9 @@ html, body {
 
 .dark-theme .sp-theme-toggle .theme-icon-moon { display: block; }
 .dark-theme .sp-theme-toggle .theme-icon-sun { display: none; }
+
+/* Temporal disable transitions during load */
+.sp-no-transition,
+.sp-no-transition * {
+  transition: none !important;
+}

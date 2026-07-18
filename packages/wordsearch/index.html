@@ -1,9 +1,32 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="sp-no-transition">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sopa de Letras — SourcePlay</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var themeParam = params.get('theme');
+        if (themeParam === 'dark' || themeParam === 'light') {
+          localStorage.setItem('sourceplay-theme', themeParam);
+        }
+      } catch (e) {}
+      var savedTheme = localStorage.getItem('sourceplay-theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+        document.documentElement.classList.remove('light-theme');
+        document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.documentElement.classList.add('light-theme');
+        document.documentElement.classList.remove('dark-theme');
+        document.documentElement.style.colorScheme = 'light';
+      }
+    })();
+  </script>
   <script type="module">
     import { initTheme } from '@sourceplay/shared';
     initTheme();
@@ -43,6 +66,7 @@
 
       <div class="board-wrap">
         <div id="board"></div>
+        <svg id="overlays-svg" viewBox="0 0 1000 1000"></svg>
       </div>
 
       <div class="controls">

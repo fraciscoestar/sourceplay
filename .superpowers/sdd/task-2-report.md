@@ -1,86 +1,87 @@
-# Task 2 Report: Wordlist Extraction and Accent Cleaning
+# Task 2 Report: RNG and Core Mathematical Solver (TDD)
 
-## What Was Implemented
+## 1. What was Implemented
 
-1. **Spanish Wordlist Fetching Script**: Created a script at [download-words.js](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/scratch/download-words.js) that downloads the 10,000 most common Spanish words, normalizes them, filters them (keeping words between length 4 and 10), and exports them as `SPANISH_WORDS` in [words.ts](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/words.ts). Note that we updated the regex to match the brief's text description of filtering for lengths 4-10 (`/^[A-ZÑ]{4,10}$/`).
-2. **Accent Cleaning**: Implemented the [cleanWord](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/core.ts) utility function in [core.ts](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/core.ts), which strips accents and converts characters to uppercase while properly preserving `Ñ`.
-3. **Validation & Verification**: Created a test script at [test-words.ts](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/test-words.ts) which asserts the dictionary has at least 5000 words and that accent cleaning behaves correctly.
+We implemented:
+1. **Deterministic PRNG (`packages/lights-out/src/rng.ts`)**:
+   - `mulberry32`: A 32-bit generator function for generating repeatable, pseudo-random float sequences.
+   - `hashSeed`: Generates a numeric seed from a string (FNV-1a 32-bit hash).
+   - `randomSeed`: Generates a high-entropy numeric seed using time and math.random.
+   - `parseSeed`: Normalizes seed input (either strings or digits).
+
+2. **Core Lights Out Linear Algebra Solver and Board Generator (`packages/lights-out/src/lights-out-core.ts`)**:
+   - `solveLightsOut`: Solves Lights Out using Gaussian elimination and nullspace search over GF(2). Minimizes click count (Hamming weight) across all combinations of nullspace vectors.
+   - `buildPuzzle`: Generates a guaranteed-solvable board configuration using random clicks based on the deterministic seed and chosen difficulty.
+
+3. **Automated Verification Test Script (`packages/lights-out/src/test-solver.ts`)**:
+   - Asserts mathematical correctness of the solver on solvable/unsolvable 2x2 edge cases.
+   - Verifies optimal moves calculation and checks that applying optimal moves indeed turns off all lights across all difficulty levels (4x4, 5x5, 7x7, 9x9).
 
 ---
 
-## TDD Evidence
+## 2. What was Tested and Test Results
 
-### Failing Test Run Output
-First, running with a dummy implementation of [cleanWord](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/core.ts#L1-L4) (which just converted to uppercase without replacing accents):
+We ran verification tests using the script `packages/lights-out/src/test-solver.ts` with `npx tsx`.
+All test assertions succeeded:
+- Verified that an empty board takes 0 clicks.
+- Verified that a 2x2 single cell ON configuration is solvable.
+- Verified that the board is cleared for all difficulties:
+  - `facil` (4x4, optimal moves = 4)
+  - `medio` (5x5, optimal moves = 9)
+  - `dificil` (7x7, optimal moves = 21)
+  - `experto` (9x9, optimal moves = 27)
 
+---
+
+## 3. TDD Evidence
+
+### RED Phase
+- **Command Run**: `npx tsx packages/lights-out/src/test-solver.ts`
+- **Why Failure was Expected**: The solver was stubbed to return `null` and the generator returned empty defaults, so checking that an empty board took 0 clicks failed because it expected `clicks` to not be `null`.
+- **Failing Output**:
 ```
-Testing wordlist...
-C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\wordsearch\src\test-words.ts:12
-		throw new Error(`Accent cleaning failed: ${cleanTest}`);
-		      ^
+Running solver mathematical checks...
+C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\lights-out\src\test-solver.ts:5
+    throw new Error(`Assertion failed: ${msg}`);
+          ^
 
-Error: Accent cleaning failed: ÁÉÍÓÚÜÑ
-    at testWordlist (C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\wordsearch\src\test-words.ts:11:11)
-    at C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\wordsearch\src\test-words.ts:16:1
-    at ViteNodeRunner.runModule (file:///C:/Users/Fraci/AppData/Local/npm-cache/_npx/f2342a4b64a2bc92/node_modules/vite-node/dist/client.mjs:368:4)
-    at ViteNodeRunner.directRequest (file:///C:/Users/Fraci/AppData/Local/npm-cache/_npx/f2342a4b64a2bc92/node_modules/vite-node/dist/client.mjs:348:3)
-    at ViteNodeRunner.cachedRequest (file:///C:/Users/Fraci/AppData/Local/npm-cache/_npx/f2342a4b64a2bc92/node_modules/vite-node/dist/client.mjs:181:11)
-    at ViteNodeRunner.executeFile (file:///C:/Users/Fraci/AppData/Local/npm-cache/_npx/f2342a4b64a2bc92/node_modules/vite-node/dist/client.mjs:156:10)
-    at CAC.run (file:///C:/Users/Fraci/AppData/Local/npm-cache/_npx/f2342a4b64a2bc92/node_modules/vite-node/dist/cli.mjs:92:28)
-
-Node.js v24.14.1
+Error: Assertion failed: Empty board should take 0 clicks
+    at assert (C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\lights-out\src\test-solver.ts:5:11)
+    at <anonymous> (C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\lights-out\src\test-solver.ts:21:1)
 ```
 
-### Passing Test Run Output
-After implementing the accent-replacement rules in [cleanWord](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/core.ts#L1-L10):
-
+### GREEN Phase
+- **Command Run**: `npx tsx packages/lights-out/src/test-solver.ts`
+- **Passing Output**:
 ```
-Testing wordlist...
-Wordlist test PASSED. Word count: 9385
+Running solver mathematical checks...
+- Difficulty facil (N=4): optimal moves = 4
+- Difficulty medio (N=5): optimal moves = 9
+- Difficulty dificil (N=7): optimal moves = 21
+- Difficulty experto (N=9): optimal moves = 27
+ALL MATHEMATICAL TESTS PASSED!
 ```
 
 ---
 
-## Verification Steps and Outputs
+## 4. Files Changed
 
-1. Run the download script:
-   ```bash
-   node packages/wordsearch/scratch/download-words.js
-   ```
-   *Output:*
-   ```
-   Fetched 9385 valid words.
-   Saved src/words.ts
-   ```
-
-2. Run the test/verification script using `vite-node`:
-   ```bash
-   npx vite-node packages/wordsearch/src/test-words.ts
-   ```
-   *Output:*
-   ```
-   Testing wordlist...
-   Wordlist test PASSED. Word count: 9385
-   ```
+The following files were created and committed:
+- `packages/lights-out/src/rng.ts`
+- `packages/lights-out/src/lights-out-core.ts`
+- `packages/lights-out/src/test-solver.ts`
 
 ---
 
-## Files Changed
+## 5. Self-Review Findings
 
-- [download-words.js](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/scratch/download-words.js) (Created)
-- [words.ts](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/words.ts) (Created)
-- [core.ts](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/core.ts) (Created)
-- [test-words.ts](file:///C:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordsearch/src/test-words.ts) (Created)
-
----
-
-## Self-Review Findings
-
-- **Distinct Spanish Words**: Verified that we fetched `9385` unique Spanish words of lengths 4-10, which easily satisfies the criteria of $\ge 5000$ words.
-- **Accent Cleaning & Ñ**: Verified that `cleanWord` strips Spanish accents (`áéíóúü`) and correctly keeps `Ñ` in uppercase, matching the assertion in the test.
-- **Test Suitability**: The test script runs fast and asserts exactly the contract needed.
+- **Completeness**: All required interfaces and behavior from the spec have been completely implemented.
+- **Quality**: Variable names are clear and functions are well-structured.
+- **Discipline**: Followed TDD correctly by introducing stubs, executing and watching the tests fail (RED), implementing the features, and then ensuring they pass (GREEN).
+- **Testing**: The mathematical tests cover grid sizes up to 9x9 and simulate applying the optimal click solution to confirm it results in all lights being off.
 
 ---
 
-## Issues or Concerns
-None. Everything works correctly and is verified.
+## 6. Issues or Concerns
+
+None. The mathematical solver performs perfectly and efficiently.

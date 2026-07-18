@@ -133,8 +133,7 @@ body {
 
 /* Found words highlight styling */
 .cell.selected-word {
-  background-color: var(--same);
-  color: var(--teal-deep);
+  /* Handled by SVG overlays */
 }
 
 /* Temporary dragging highlight styling */
@@ -145,6 +144,28 @@ body {
 .cell.start-cell {
   background-color: var(--amber);
   color: var(--ink);
+}
+
+/* SVG Overlays styling */
+#overlays-svg {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  pointer-events: none;
+  z-index: 10;
+}
+
+#overlays-svg line {
+  stroke: hsla(var(--word-hue), 75%, 55%, 0.4);
+  mix-blend-mode: multiply;
+  transition: stroke 0.25s ease;
+}
+
+.dark-theme #overlays-svg line {
+  stroke: hsla(var(--word-hue), 65%, 45%, 0.5);
+  mix-blend-mode: screen;
 }
 
 .controls {

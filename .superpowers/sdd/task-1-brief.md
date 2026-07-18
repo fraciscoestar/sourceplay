@@ -1,24 +1,24 @@
 ### Task 1: Package Scaffolding & Monorepo Configuration
 
 **Files:**
-- Create: `packages/wordsearch/package.json`
-- Create: `packages/wordsearch/tsconfig.json`
-- Create: `packages/wordsearch/vite.config.ts`
-- Create: `packages/wordsearch/index.html`
+- Create: `packages/lights-out/package.json`
+- Create: `packages/lights-out/tsconfig.json`
+- Create: `packages/lights-out/vite.config.ts`
 - Modify: `package.json` (Root)
+- Modify: `apps/selector/src/main.ts`
 - Modify: `scripts/assemble-build.js`
 
 **Interfaces:**
-- Produces: Scaffolding files for `@sourceplay/wordsearch` package, configuring compilation, Vite dev server, and build assembly paths.
+- Consumes: None
+- Produces: Package registration for dev and build runs
 
-- [ ] **Step 1: Create package.json for wordsearch**
-  Write to `packages/wordsearch/package.json`:
+- [ ] **Step 1: Create package configuration**
+  Create `packages/lights-out/package.json`:
   ```json
   {
-    "name": "@sourceplay/wordsearch",
-    "private": true,
+    "name": "@sourceplay/lights-out",
     "version": "1.0.0",
-    "type": "module",
+    "private": true,
     "scripts": {
       "dev": "vite",
       "build": "tsc && vite build"
@@ -29,8 +29,8 @@
   }
   ```
 
-- [ ] **Step 2: Create tsconfig.json for wordsearch**
-  Write to `packages/wordsearch/tsconfig.json`:
+- [ ] **Step 2: Create TypeScript compiler config**
+  Create `packages/lights-out/tsconfig.json`:
   ```json
   {
     "extends": "../../tsconfig.json",
@@ -41,83 +41,61 @@
   }
   ```
 
-- [ ] **Step 3: Create vite.config.ts for wordsearch**
-  Write to `packages/wordsearch/vite.config.ts`:
+- [ ] **Step 3: Create Vite server configuration**
+  Create `packages/lights-out/vite.config.ts`:
   ```typescript
   import { defineConfig } from 'vite';
 
   export default defineConfig({
     server: {
-      port: 5176
+      port: 5178
     }
   });
   ```
 
-- [ ] **Step 4: Create basic index.html placeholder**
-  Write to `packages/wordsearch/index.html`:
-  ```html
-  <!DOCTYPE html>
-  <html lang="es">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sopa de Letras — SourcePlay</title>
-    <script type="module">
-      import { initTheme } from '@sourceplay/shared';
-      initTheme();
-    </script>
-  </head>
-  <body>
-    <div id="app">Sopa de Letras Scaffold</div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
-  </html>
-  ```
-
-- [ ] **Step 5: Create src/main.ts placeholder**
-  Create directory `packages/wordsearch/src` and write to `packages/wordsearch/src/main.ts`:
-  ```typescript
-  import { createHeader } from '@sourceplay/shared';
-  import './style.css';
-
-  createHeader({ showBackButton: true });
-  console.log('Wordsearch loaded');
-  ```
-
-- [ ] **Step 6: Create src/style.css placeholder**
-  Write to `packages/wordsearch/src/style.css`:
-  ```css
-  @import "@sourceplay/shared/style.css";
-  ```
-
-- [ ] **Step 7: Register wordsearch in root package.json scripts**
-  Modify `package.json` in the root folder to support wordsearch commands:
+- [ ] **Step 4: Register in root package.json**
+  Modify: `package.json` (Root). Add `"dev:lights-out": "npm run dev --workspace=@sourceplay/lights-out"` to scripts, and update the `"dev"` script to include it concurrently:
   ```json
-  "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\" \"npm run dev:wordsearch\"",
-  "dev:wordsearch": "npm run dev --workspace=@sourceplay/wordsearch",
+  "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\" \"npm run dev:wordsearch\" \"npm run dev:sliding-puzzle\" \"npm run dev:lights-out\"",
   ```
 
-- [ ] **Step 8: Update assembly script**
-  Modify `scripts/assemble-build.js` to include wordsearch:
-  - Add path variables:
-    ```javascript
-    const wordsearchDist = path.join(__dirname, '../packages/wordsearch/dist');
-    const targetWordsearchPath = path.join(selectorDist, 'games/wordsearch');
-    ```
-  - Add copying block:
-    ```javascript
-    if (fs.existsSync(wordsearchDist)) {
-      console.log(`Copiando build de Sopa de letras de ${wordsearchDist} a ${targetWordsearchPath}...`);
-      copyDirSync(wordsearchDist, targetWordsearchPath);
-      console.log('¡Sopa de letras copiada con éxito!');
-    } else {
-      console.warn('Advertencia: Compilación de Sopa de letras no encontrada.');
+- [ ] **Step 5: Register in games selector main page**
+  Modify: `apps/selector/src/main.ts` by adding Lights Out in the `GAMES_REGISTRY` array:
+  ```typescript
+    {
+      id: 'lights-out',
+      title: 'Apaga las Luces',
+      description: 'Conmuta las luces de la cuadrícula hasta apagarlas todas en el menor número de movimientos.',
+      url: import.meta.env.DEV ? 'http://localhost:5178/' : './games/lights-out/index.html',
+      imageUrl: './assets/covers/lights-out.jpg'
     }
-    ```
+  ```
 
-- [ ] **Step 9: Run install and build verify**
-  Run: `npm install`
-  Run: `npm run build:all`
-  Verify that the build passes and files are created under `apps/selector/dist/games/wordsearch`.
+- [ ] **Step 6: Update assemble-build script**
+  Modify: `scripts/assemble-build.js` to copy compilation assets to selector dist:
+  ```javascript
+  const lightsOutDist = path.join(__dirname, '../packages/lights-out/dist');
+  const targetLightsOutPath = path.join(selectorDist, 'games/lights-out');
+
+  if (fs.existsSync(lightsOutDist)) {
+    console.log(`Copiando build de Apaga las Luces de ${lightsOutDist} a ${targetLightsOutPath}...`);
+    copyDirSync(lightsOutDist, targetLightsOutPath);
+    console.log('¡Apaga las Luces copiado con éxito!');
+  } else {
+    console.warn('Advertencia: Compilación de Apaga las Luces no encontrada.');
+  }
+  ```
+  *(Add this right after sliding-puzzle steps, before printing completion message).*
+
+- [ ] **Step 7: Run verification compile**
+  Run command: `npm run build:all`
+  Expected: Success without TS errors.
+
+- [ ] **Step 8: Commit Scaffolding**
+  Run:
+  ```bash
+  git add packages/lights-out/package.json packages/lights-out/tsconfig.json packages/lights-out/vite.config.ts package.json apps/selector/src/main.ts scripts/assemble-build.js
+  git commit -m "chore: setup lights-out workspace scaffolding"
+  ```
 
 ---

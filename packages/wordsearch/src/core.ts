@@ -145,21 +145,36 @@ function tryGenerateBoard(
 
   // 5. Place words
   const placedDirections: { x: number; y: number }[] = [];
-  for (const word of selectedWords) {
+  for (let wIdx = 0; wIdx < selectedWords.length; wIdx++) {
+    const word = selectedWords[wIdx];
     let placed = false;
-    // Try up to 500 times to place the word
-    for (let pTry = 0; pTry < 500; pTry++) {
-      const startX = Math.floor(prng() * size);
-      const startY = Math.floor(prng() * size);
-      const dir = getDirection(difficulty, prng);
 
-      if (canPlaceWord(grid, word, startX, startY, dir, size)) {
-        placeWord(grid, word, startX, startY, dir);
-        placedDirections.push(dir);
+    // For subsequent words, try to intersect with already placed letters first with a 25% probability to allow natural overlaps
+    if (wIdx > 0 && prng() < 0.25) {
+      const placement = tryPlaceWordWithIntersection(grid, word, size, difficulty, prng);
+      if (placement) {
+        placeWord(grid, word, placement.startX, placement.startY, placement.dir);
+        placedDirections.push(placement.dir);
         placed = true;
-        break;
       }
     }
+
+    // Fallback to random placement if not placed by intersection (or if first word)
+    if (!placed) {
+      for (let pTry = 0; pTry < 500; pTry++) {
+        const startX = Math.floor(prng() * size);
+        const startY = Math.floor(prng() * size);
+        const dir = getDirection(difficulty, prng);
+
+        if (canPlaceWord(grid, word, startX, startY, dir, size)) {
+          placeWord(grid, word, startX, startY, dir);
+          placedDirections.push(dir);
+          placed = true;
+          break;
+        }
+      }
+    }
+
     if (!placed) return null; // placement failed, discard grid
   }
 
@@ -273,3 +288,87 @@ function checkWordAt(
   }
   return true;
 }
+
+function shuffleArray<T>(arr: T[], prng: () => number): void {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(prng() * (i + 1));
+    const temp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = temp;
+  }
+}
+
+function isDirectionAllowedForDifficulty(dir: { x: number; y: number }, difficulty: string, prng: () => number): boolean {
+  const isBackward = dir.x < 0 || dir.y < 0;
+  if (!isBackward) return true; // Forward directions are always allowed
+
+  let backwardProb = 0.5;
+  switch (difficulty) {
+    case 'facil':
+      return false; // 0% backward
+    case 'medio':
+      backwardProb = 0.15;
+      break;
+    case 'dificil':
+      backwardProb = 0.30;
+      break;
+    case 'experto':
+      return true; // 100% allowed
+  }
+
+  return prng() < backwardProb;
+}
+
+function tryPlaceWordWithIntersection(
+  grid: string[][],
+  word: string,
+  size: number,
+  difficulty: string,
+  prng: () => number
+): { startX: number; startY: number; dir: { x: number; y: number } } | null {
+  const occupied: { x: number; y: number; char: string }[] = [];
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (grid[y][x] !== '') {
+        occupied.push({ x, y, char: grid[y][x] });
+      }
+    }
+  }
+
+  if (occupied.length === 0) return null;
+
+  shuffleArray(occupied, prng);
+
+  for (const cell of occupied) {
+    const matchingIndices: number[] = [];
+    for (let i = 0; i < word.length; i++) {
+      if (word[i] === cell.char) {
+        matchingIndices.push(i);
+      }
+    }
+
+    if (matchingIndices.length === 0) continue;
+    shuffleArray(matchingIndices, prng);
+
+    const candidateDirs = [...DIRECTIONS];
+    shuffleArray(candidateDirs, prng);
+
+    for (const i of matchingIndices) {
+      for (const dir of candidateDirs) {
+        if (!isDirectionAllowedForDifficulty(dir, difficulty, prng)) {
+          continue;
+        }
+
+        const startX = cell.x - i * dir.x;
+        const startY = cell.y - i * dir.y;
+
+        if (canPlaceWord(grid, word, startX, startY, dir, size)) {
+          return { startX, startY, dir };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+

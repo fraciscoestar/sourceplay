@@ -1,7 +1,6 @@
 import { createHeader } from '@sourceplay/shared';
 import { generateWordSearch, WordSearchBoard } from './core';
 import { randomSeed } from './rng';
-import './style.css';
 
 // Constants
 const DIFFICULTIES: Record<string, { label: string; size: number }> = {
@@ -116,6 +115,10 @@ startGameBtn.addEventListener('click', () => {
 function setupGame(difficulty: string, seed: string): void {
   activeBoard = generateWordSearch(difficulty, seed);
   foundWords.clear();
+  const overlaysSvg = document.getElementById('overlays-svg') as SVGSVGElement | null;
+  if (overlaysSvg) {
+    overlaysSvg.innerHTML = '';
+  }
   elapsedTime = 0;
   timerEl.textContent = '00:00';
   startTimer();
@@ -323,11 +326,17 @@ function commitSelection(path: { x: number; y: number }[]): void {
   }
 
   const cells = boardEl.querySelectorAll('.cell') as NodeListOf<HTMLDivElement>;
-  cells.forEach(c => c.classList.remove('selecting'));
+  cells.forEach(c => {
+    c.classList.remove('selecting');
+    c.classList.remove('start-cell');
+  });
 
   if (matchedWord) {
     foundWords.add(matchedWord);
     showToast(`¡Encontrado: ${matchedWord}!`);
+
+    // Draw the SVG overlay line for the found word
+    drawWordOverlay(path, matchedWord);
 
     // Apply permanent highlighting
     path.forEach(pt => {
@@ -345,9 +354,6 @@ function commitSelection(path: { x: number; y: number }[]): void {
     if (foundWords.size === words.length) {
       triggerWin();
     }
-  } else {
-    // Clear start cell style
-    cells.forEach(c => c.classList.remove('start-cell'));
   }
 }
 
@@ -426,6 +432,41 @@ window.addEventListener('click', (e) => {
     });
   }
 });
+
+function drawWordOverlay(path: { x: number; y: number }[], word: string): void {
+  if (!activeBoard) return;
+  const overlaysSvg = document.getElementById('overlays-svg') as SVGSVGElement | null;
+  if (!overlaysSvg) return;
+
+  const size = DIFFICULTIES[activeBoard.difficulty].size;
+  const cellUnit = 1000 / size;
+
+  const startCell = path[0];
+  const endCell = path[path.length - 1];
+
+  const x1 = cellUnit * (startCell.x + 0.5);
+  const y1 = cellUnit * (startCell.y + 0.5);
+  const x2 = cellUnit * (endCell.x + 0.5);
+  const y2 = cellUnit * (endCell.y + 0.5);
+
+  const strokeWidth = cellUnit * 0.76;
+
+  const wordIndex = activeBoard.words.indexOf(word);
+  const hues = [340, 25, 50, 95, 140, 175, 205, 230, 265, 295];
+  const hue = hues[wordIndex % hues.length];
+
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', String(x1));
+  line.setAttribute('y1', String(y1));
+  line.setAttribute('x2', String(x2));
+  line.setAttribute('y2', String(y2));
+  line.setAttribute('stroke-width', String(strokeWidth));
+  line.setAttribute('stroke-linecap', 'round');
+  line.style.setProperty('--word-hue', String(hue));
+  line.id = `overlay-line-${word}`;
+
+  overlaysSvg.appendChild(line);
+}
 
 // Run menu init
 initMenu();

@@ -7,7 +7,6 @@ import {
   DifficultyKey
 } from './sudoku-core';
 import { randomSeed, parseSeed } from './rng';
-import './style.css';
 
 interface HistoryState {
   values: number[];

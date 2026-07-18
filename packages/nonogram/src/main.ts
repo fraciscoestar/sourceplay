@@ -1,7 +1,6 @@
 import { createHeader } from '@sourceplay/shared';
 import { buildPuzzle, checkVictory, SIZES, SIZE_ORDER, SizeKey } from './nonogram-core';
 import { randomSeed, parseSeed } from './rng';
-import './style.css';
 
 // ─────────────────────────────────────────────
 // Types

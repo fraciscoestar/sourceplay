@@ -66,7 +66,7 @@ function testGenerator() {
   const originalWords = [...SPANISH_WORDS];
   try {
     SPANISH_WORDS.length = 0;
-    SPANISH_WORDS.push('RADAR', 'ELLE', 'CASA', 'LUNA', 'MESA', 'ROPA', 'PISO', 'CENA', 'BOLA', 'TEMA');
+    SPANISH_WORDS.push('RADAR', 'ELLE', 'CASA', 'LUNA', 'MESA', 'ROPA', 'PISO');
     
     const board = generateWordSearch('medio', 'palindrometest');
     

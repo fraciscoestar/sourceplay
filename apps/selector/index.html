@@ -1,9 +1,32 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="sp-no-transition">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SourcePlay — Selector de Juegos</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var themeParam = params.get('theme');
+        if (themeParam === 'dark' || themeParam === 'light') {
+          localStorage.setItem('sourceplay-theme', themeParam);
+        }
+      } catch (e) {}
+      var savedTheme = localStorage.getItem('sourceplay-theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+        document.documentElement.classList.remove('light-theme');
+        document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.documentElement.classList.add('light-theme');
+        document.documentElement.classList.remove('dark-theme');
+        document.documentElement.style.colorScheme = 'light';
+      }
+    })();
+  </script>
   <script type="module">
     import { initTheme } from '@sourceplay/shared';
     initTheme();
@@ -16,9 +39,13 @@
       <p class="subtitle">Una colección de minijuegos clásicos e interactivos listos para jugar en tu navegador.</p>
     </div>
 
-    <main class="grid-container">
-      <div class="games-grid" id="gamesGrid"></div>
-    </main>
+    <div class="grid-wrapper">
+      <main class="grid-container">
+        <div class="games-grid" id="gamesGrid"></div>
+      </main>
+      <div class="scroll-blur-top"></div>
+      <div class="scroll-blur-bottom"></div>
+    </div>
 
     <footer>
       <p>&copy; 2026 SourcePlay. Hecho con ❤️ y TypeScript.</p>

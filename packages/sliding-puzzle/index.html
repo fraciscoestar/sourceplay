@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sudoku — SourcePlay</title>
+  <title>Rompecabezas — SourcePlay</title>
   <link rel="stylesheet" href="/src/style.css">
   <script>
     (function() {
@@ -37,8 +37,8 @@
     <!-- MENÚ DE INICIO -->
     <div id="startMenu" class="view">
       <header class="game-local-header">
-        <h1>Sudoku</h1>
-        <p class="menu-subtitle">Selecciona una dificultad para jugar</p>
+        <h1>Rompecabezas</h1>
+        <p class="menu-subtitle">Desliza las fichas para ordenarlas</p>
       </header>
 
       <div class="menu-content">
@@ -56,7 +56,7 @@
     <!-- PANTALLA DE JUEGO (Oculta por defecto) -->
     <div id="gameArea" class="view hidden">
       <header class="game-local-header">
-        <h1>Sudoku</h1>
+        <h1>Rompecabezas</h1>
       </header>
 
       <div class="ticket">
@@ -66,17 +66,10 @@
 
       <div class="board-wrap">
         <div id="board"></div>
-        <div class="loading-veil" id="loadingVeil">Generando sudoku…</div>
+        <div class="loading-veil" id="loadingVeil">Generando tablero…</div>
       </div>
 
       <div class="controls">
-        <div class="row-line">
-          <button class="btn" id="notesToggle">Notas: Off</button>
-          <button class="btn ghost" id="eraseBtn">Borrar</button>
-        </div>
-
-        <div class="keypad" id="keypad"></div>
-
         <!-- CONTROLES DE ACCIONES (DESHACER, REHACER, CHECKPOINTS) -->
         <div class="row-line">
           <button class="btn icon-btn tooltip" id="undoBtn" disabled data-tooltip="Deshacer">
@@ -100,7 +93,7 @@
         </div>
 
         <div class="status-row">
-          <span id="progressLabel">0 / 81</span>
+          <span id="movesLabel">Movimientos: 0</span>
           <span id="timer">00:00</span>
         </div>
       </div>
