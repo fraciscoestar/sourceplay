@@ -88,3 +88,27 @@ In response to the reviewer findings, the following fixes were successfully appl
 2. **Vite Workspace Build:**
    - Command: `npm run build --workspace=@sourceplay/lights-out`
    - Output: Successful build (`dist/index.html`, assets compilation complete).
+
+## Re-Review Findings and Fixes
+
+In response to the re-review findings, the following fixes were successfully applied to [packages/lights-out/src/main.ts](file:///c:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/lights-out/src/main.ts):
+
+1. **Stuck Confirm Modal on Load:**
+   - Modified `handleCheckpointAction()` under `action === 'load'` so that the confirmation overlay callback invokes `hideConfirmModal()` immediately before calling `performLoad(id)`.
+
+2. **Move Counter Stale on Undo/Redo:**
+   - Updated `undoMove()` and `redoMove()` to set `state.moveCount = state.historyIndex` and updated the UI label: `movesLabelEl.textContent = "Movimientos: " + state.moveCount;` so that it matches the current position in the history stack.
+
+3. **Stale Modal on Last Checkpoint Deletion:**
+   - Modified `openLoadCheckpointModal()` to call `loadCheckpointOverlayEl.classList.remove('show');` to close the overlay if the checkpoint list becomes empty.
+
+### Verification of Re-Review Fixes
+
+1. **Test Solver Execution:**
+   - Command: `npx tsx packages/lights-out/src/test-solver.ts`
+   - Output: `ALL MATHEMATICAL TESTS PASSED!`
+
+2. **Vite Workspace Build:**
+   - Command: `npm run build --workspace=@sourceplay/lights-out`
+   - Output: Successful build (`dist/index.html`, assets compilation complete).
+

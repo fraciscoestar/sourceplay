@@ -326,6 +326,8 @@ function undoMove(): void {
   if (!state || state.historyIndex <= 0 || state.solved) return;
   state.historyIndex--;
   state.board = [...state.history[state.historyIndex]];
+  state.moveCount = state.historyIndex;
+  movesLabelEl.textContent = "Movimientos: " + state.moveCount;
   renderBoard();
   updateHistoryButtons();
 }
@@ -334,6 +336,8 @@ function redoMove(): void {
   if (!state || state.historyIndex >= state.history.length - 1 || state.solved) return;
   state.historyIndex++;
   state.board = [...state.history[state.historyIndex]];
+  state.moveCount = state.historyIndex;
+  movesLabelEl.textContent = "Movimientos: " + state.moveCount;
   renderBoard();
   updateHistoryButtons();
 }
@@ -446,7 +450,10 @@ function handleSaveCheckpoint(): void {
 
 function openLoadCheckpointModal(): void {
   const list = getCheckpoints();
-  if (list.length === 0) return;
+  if (list.length === 0) {
+    loadCheckpointOverlayEl.classList.remove('show');
+    return;
+  }
 
   checkpointListEl.innerHTML = '';
   list.forEach((cp) => {
@@ -484,7 +491,10 @@ function handleCheckpointAction(e: Event): void {
       showConfirmModal(
         '¿Cargar checkpoint?',
         'Se perderá el progreso de la partida actual no guardada.',
-        () => performLoad(id)
+        () => {
+          hideConfirmModal();
+          performLoad(id);
+        }
       );
     } else {
       performLoad(id);
