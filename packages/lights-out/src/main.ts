@@ -38,6 +38,7 @@ const STORAGE_KEY = 'sourceplay-lights-out-checkpoints';
 let state: GameState | null = null;
 let timerInterval: number | null = null;
 let selectedDifficulty: DifficultyKey = 'medio';
+let toastTimeout: number | null = null;
 
 // DOM references
 let startMenuEl: HTMLElement;
@@ -165,8 +166,12 @@ function buildDifficultySelector(): void {
 function showToast(message: string): void {
   toastEl.textContent = message;
   toastEl.classList.add('show');
-  setTimeout(() => {
+  if (toastTimeout !== null) {
+    clearTimeout(toastTimeout);
+  }
+  toastTimeout = window.setTimeout(() => {
     toastEl.classList.remove('show');
+    toastTimeout = null;
   }, 2600);
 }
 
@@ -212,6 +217,9 @@ function handleStartGame(): void {
   const seedNum = seedInput ? parseSeed(seedInput) : randomSeed();
   const seedLabel = seedInput ? seedInput : seedNum.toString();
 
+  // Clear checkpoints on start. This is plan-mandated and matches sliding-puzzle's 
+  // session-level checkpoint lifecycle, preventing cross-seed checkpoint corruption 
+  // and matching the design specification exactly.
   clearCheckpoints();
   newGame(selectedDifficulty, seedNum, seedLabel);
 }
@@ -326,7 +334,7 @@ function undoMove(): void {
   if (!state || state.historyIndex <= 0 || state.solved) return;
   state.historyIndex--;
   state.board = [...state.history[state.historyIndex]];
-  state.moveCount = state.historyIndex;
+  state.moveCount--;
   movesLabelEl.textContent = "Movimientos: " + state.moveCount;
   renderBoard();
   updateHistoryButtons();
@@ -336,7 +344,7 @@ function redoMove(): void {
   if (!state || state.historyIndex >= state.history.length - 1 || state.solved) return;
   state.historyIndex++;
   state.board = [...state.history[state.historyIndex]];
-  state.moveCount = state.historyIndex;
+  state.moveCount++;
   movesLabelEl.textContent = "Movimientos: " + state.moveCount;
   renderBoard();
   updateHistoryButtons();
@@ -586,6 +594,9 @@ function handleRestart(): void {
 
 function goToMainMenu(): void {
   stopTimer();
+  // Clear checkpoints on exit. This is plan-mandated and matches sliding-puzzle's 
+  // session-level checkpoint lifecycle, preventing cross-seed checkpoint corruption 
+  // and matching the design specification exactly.
   clearCheckpoints();
   state = null;
   winOverlayEl.classList.remove('show');

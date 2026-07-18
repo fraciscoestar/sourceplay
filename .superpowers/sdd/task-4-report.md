@@ -112,3 +112,39 @@ In response to the re-review findings, the following fixes were successfully app
    - Command: `npm run build --workspace=@sourceplay/lights-out`
    - Output: Successful build (`dist/index.html`, assets compilation complete).
 
+
+## Additional Re-Review Findings and Fixes (Move Counter and Toast)
+
+In response to the latest task 4 re-review findings, the following fixes and clarifications were successfully implemented:
+
+1. **Move Counter Logic on Undo/Redo:**
+   - Updated `undoMove()` to decrement the move counter via `state.moveCount--` and updated the UI label, rather than setting it to `state.historyIndex`.
+   - Updated `redoMove()` to increment the move counter via `state.moveCount++` and updated the UI label, rather than setting it to `state.historyIndex`.
+   - This resolves bugs where loading checkpoints resets `state.historyIndex` but retains `state.moveCount`, and avoids incorrect moves counting when the history stack shifts (exceeds 100 elements).
+
+2. **Toast Timer Overlap Resolution:**
+   - Introduced a global `toastTimeout: number | null = null;` variable.
+   - Modified `showToast()` to clear the active timeout using `clearTimeout(toastTimeout)` if a previous toast timer exists before scheduling a new timeout. This prevents rapidly triggered toasts from hiding prematurely.
+
+3. **Checkpoints Lifecycle Clarification:**
+   - Added code comments to [packages/lights-out/src/main.ts](file:///c:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/lights-out/src/main.ts) clarifying that clearing checkpoints in `handleStartGame()` and `goToMainMenu()` is plan-mandated.
+   - This session-level lifecycle aligns with the sliding-puzzle behavior, preventing cross-seed checkpoint corruption and matching the design specification exactly.
+
+### Verification of Latest Fixes
+
+1. **Test Solver Execution:**
+   - Command: `npx tsx packages/lights-out/src/test-solver.ts`
+   - Output:
+     ```
+     Running solver mathematical checks...
+     - Difficulty facil (N=4): optimal moves = 4
+     - Difficulty medio (N=5): optimal moves = 9
+     - Difficulty dificil (N=7): optimal moves = 21
+     - Difficulty experto (N=9): optimal moves = 27
+     ALL MATHEMATICAL TESTS PASSED!
+     ```
+
+2. **Vite Workspace Build:**
+   - Command: `npm run build --workspace=@sourceplay/lights-out`
+   - Output: Successful build with Vite (`dist/index.html` and compilation complete).
+
