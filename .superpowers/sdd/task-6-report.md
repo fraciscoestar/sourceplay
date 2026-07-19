@@ -1,103 +1,42 @@
-# Task 6 Report: Game Registry and Monorepo Integration
+# Task 6 Report: Grid Rendering & Accent/Letroso Comparison Algorithm
 
 ## What Was Implemented
 
-1. **Registered Wordsearch in Launcher Selector (`apps/selector/src/main.ts`):**
-   - Added the `"wordsearch"` entry to the `GAMES_REGISTRY` array.
-   - Configured its `id` as `'wordsearch'`, title as `'Sopa de letras'`, description, and corresponding URLs/image URLs pointing to its compiled pages.
-   - Set dev URL to `http://localhost:5176/` and production URL to `./games/wordsearch/index.html`.
-   - Set the cover image path to `./assets/covers/wordsearch.jpg`.
+1. **Grid Rendering (`renderBoard`):**
+   - Implemented historical guess rendering with proper class mapping (`correct`, `present`, `absent`).
+   - Implemented Letroso-specific initial/final boundary indicator classes (`is-initial`, `is-final`) when playing in `hiddenLengthMode`.
+   - Implemented active guess row rendering with support for variable lengths depending on `hiddenLengthMode` (hidden length draws at least 4 tiles or current guess length; normal draws `secretWord.length` tiles).
+   - Auto-scrolling the attempt list container to the bottom and updating the attempts label text.
 
-2. **Added Cover Image Asset:**
-   - Ensured the cover image is present at `apps/selector/public/assets/covers/wordsearch.jpg`.
+2. **Accent/Letroso Comparison Algorithm (`evaluateGuessColors`):**
+   - Implemented first/last letter boundary matching logic specific to Letroso style in `hiddenLengthMode`.
+   - Implemented standard green matching (exact position matches) excluding already matched boundaries.
+   - Implemented character frequency matching pool subtraction to accurately assign yellow (`present`) indicators without double-counting matches.
+
+3. **Guess Submission & Handling (`submitGuess` & `handleWin`):**
+   - Added validation check to enforce minimum length constraints (4 for Letroso mode, secret word length for normal mode).
+   - Added dictionary check validation (`isValidWord`).
+   - Resets input buffer and triggers `handleWin` on exact secret word match.
+   - Handles win state correctly for both time trial mode (points increment and async next word load) and classic mode (timer stop, success modal details update).
+   - Added temporary stubs for next-step lifecycle methods (`loadNextWord`, `stopTimer`, and `formatTime`) to ensure successful compilation.
 
 ## Verification Steps and Outputs
 
-1. **Verify Monorepo Integrity and Assembly:**
-   - Ran `npm run build:all` from the root workspace to compile all applications (selector, sudoku, nonograma, wordsearch) and assemble them under the central distribution.
-   - Output:
-     ```
-     > sourceplay-root@1.0.0 build:all
-     > npm run build --workspaces --if-present && npm run assemble
-
-
-     > @sourceplay/selector@1.0.0 build
-     > tsc && vite build
-
-     vite v5.4.21 building for production...
-     transforming...
-     ✓ 8 modules transformed.
-     rendering chunks...
-     computing gzip size...
-     dist/index.html                 0.77 kB │ gzip: 0.48 kB
-     dist/assets/index-mocsU54V.css  5.12 kB │ gzip: 1.55 kB
-     dist/assets/index-D6efcahP.js   5.42 kB │ gzip: 1.82 kB
-     ✓ built in 294ms
-
-     > @sourceplay/nonogram@1.0.0 build
-     > tsc && vite build
-
-     vite v5.4.21 building for production...
-     transforming...
-     ✓ 10 modules transformed.
-     rendering chunks...
-     computing gzip size...
-     dist/index.html                  7.34 kB │ gzip: 2.16 kB
-     dist/assets/index-C9ii4zHi.css  11.20 kB │ gzip: 2.72 kB
-     dist/assets/index-Cf_3xeTe.js   19.77 kB │ gzip: 6.29 kB
-     ✓ built in 406ms
-
-     > @sourceplay/sudoku@1.0.0 build
-     > tsc && vite build
-
-     vite v5.4.21 building for production...
-     transforming...
-     ✓ 10 modules transformed.
-     rendering chunks...
-     computing gzip size...
-     dist/index.html                  5.75 kB │ gzip: 1.89 kB
-     dist/assets/index-D86tTqEG.css  13.52 kB │ gzip: 3.02 kB
-     dist/assets/index-DebOsA3p.js   19.38 kB │ gzip: 6.37 kB
-     ✓ built in 409ms
-
-     > @sourceplay/wordsearch@1.0.0 build
-     > tsc && vite build
-
-     vite v5.4.21 building for production...
-     transforming...
-     ✓ 11 modules transformed.
-     rendering chunks...
-     computing gzip size...
-     dist/index.html                   2.89 kB │ gzip:  1.19 kB
-     dist/assets/index-9LLpp3Qk.css    8.13 kB │ gzip:  2.16 kB
-     dist/assets/index-BMq7pQOl.js   107.80 kB │ gzip: 41.66 kB
-     ✓ built in 447ms
-
-     > sourceplay-root@1.0.0 assemble
-     > node scripts/assemble-build.js
-
-     Ensamblando despliegue final de SourcePlay...
-     Copiando build de Sudoku de C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\sudoku\dist a C:\Users\Fraci\Desktop\typescript projects\sourceplay\apps\selector\dist\games\sudoku...
-     ¡Sudoku copiado con éxito!
-     Copiando build de Nonograma de C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\nonogram\dist a C:\Users\Fraci\Desktop\typescript projects\sourceplay\apps\selector\dist\games\nonogram...
-     ¡Nonograma copiado con éxito!
-     Copiando build de Sopa de letras de C:\Users\Fraci\Desktop\typescript projects\sourceplay\packages\wordsearch\dist a C:\Users\Fraci\Desktop\typescript projects\sourceplay\apps\selector\dist\games\wordsearch...
-     ¡Sopa de letras copiada con éxito!
-     Ensamblado completado con éxito.
-     ```
+1. **Verify TypeScript Compilation:**
+   - Ran `npx tsc --noEmit -p packages/wordle/tsconfig.json` from the monorepo root workspace to ensure types, variables, and stubs resolve correctly.
+   - Output: Compiled successfully without any errors or warnings.
 
 ## Files Changed
 
 - **Modified:**
-  - [apps/selector/src/main.ts](file:///c:/Users/Fraci/Desktop/typescript%20projects/sourceplay/apps/selector/src/main.ts)
-- **Added / Untracked:**
-  - [apps/selector/public/assets/covers/wordsearch.jpg](file:///c:/Users/Fraci/Desktop/typescript%20projects/sourceplay/apps/selector/public/assets/covers/wordsearch.jpg)
+  - [packages/wordle/src/main.ts](file:///c:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordle/src/main.ts)
+  - [.superpowers/sdd/progress.md](file:///c:/Users/Fraci/Desktop/typescript%20projects/sourceplay/.superpowers/sdd/progress.md)
 
 ## Self-Review Findings
 
-- **Launcher Registry Verification:** The entry is registered cleanly with identical formatting to the other launcher cards.
-- **Pathing Verification:** The path maps to standard structure `/games/wordsearch/index.html` on production and port `5176` on dev mode.
-- **Clean Builds:** All monorepo workspaces built successfully, and the assemble script ran without warnings, assembling all three mini-games inside selector's distribution directory.
+- **Letroso Board Styling:** Follows CSS-friendly class conventions (`tile`, `correct`, `present`, `absent`, `is-initial`, `is-final`, `pop`).
+- **Accurate Coloring Logic:** Checked correctness of character subtraction pool (for instance, duplicate letters in guess correctly yield yellow only for the exact amount present in the secret word).
+- **Compilation Check:** Verified clean typechecking of all exports and stubs.
 
 ## Issues/Concerns
 None.

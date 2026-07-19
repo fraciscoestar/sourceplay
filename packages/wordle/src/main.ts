@@ -146,11 +146,169 @@ function setupInputHandlers(): void {
   });
 }
 
-// Temporary stub for renderBoard and submitGuess
-function renderBoard(): void {
-  board.innerHTML = 'Foco aquí para escribir: ' + currentGuess;
+// Stubs for lifecycle and timer (to be implemented fully in Task 7)
+function loadNextWord(): void {}
+function stopTimer(): void {}
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
-function submitGuess(): void {}
+
+function renderBoard(): void {
+  board.innerHTML = '';
+  
+  // 1. Render historical guesses
+  guesses.forEach((guess) => {
+    const row = document.createElement('div');
+    row.className = 'row-guess';
+    const colors = evaluateGuessColors(guess);
+    
+    for (let i = 0; i < guess.length; i++) {
+      const tile = document.createElement('div');
+      tile.className = `tile ${colors[i]}`;
+      tile.textContent = guess[i];
+      
+      // Letroso boundary indicators
+      if (hiddenLengthMode) {
+        if (i === 0 && guess[0] === secretWord[0]) {
+          tile.classList.add('is-initial');
+        }
+        if (i === guess.length - 1 && guess[guess.length - 1] === secretWord[secretWord.length - 1]) {
+          tile.classList.add('is-final');
+        }
+      }
+      row.appendChild(tile);
+    }
+    board.appendChild(row);
+  });
+
+  // 2. Render current active guess row
+  if (!isGameOver) {
+    const activeRow = document.createElement('div');
+    activeRow.className = 'row-guess';
+    
+    const lengthToDraw = hiddenLengthMode ? Math.max(4, currentGuess.length) : secretWord.length;
+    for (let i = 0; i < lengthToDraw; i++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      if (i < currentGuess.length) {
+        tile.textContent = currentGuess[i];
+        tile.classList.add('pop'); // Trigger CSS scaling
+      } else {
+        tile.textContent = '';
+      }
+      activeRow.appendChild(tile);
+    }
+    board.appendChild(activeRow);
+  }
+  
+  // Auto-scroll to bottom of container
+  attemptsContainer.scrollTop = attemptsContainer.scrollHeight;
+  wordStatusLabel.textContent = `Intentos: ${guesses.length}`;
+}
+
+// Exact Coloring Evaluation Algorithm
+function evaluateGuessColors(guess: string): string[] {
+  const n = guess.length;
+  const m = secretWord.length;
+  const colors = new Array<string>(n).fill('absent');
+  
+  let isInitialMatched = false;
+  let isFinalMatched = false;
+
+  // First letter boundary match (Letroso style)
+  if (hiddenLengthMode && guess[0] === secretWord[0]) {
+    colors[0] = 'correct';
+    isInitialMatched = true;
+  }
+  // Last letter boundary match (Letroso style)
+  if (hiddenLengthMode && guess[n - 1] === secretWord[m - 1]) {
+    colors[n - 1] = 'correct';
+    isFinalMatched = true;
+  }
+
+  // Standard position matches (Greens)
+  for (let i = 0; i < Math.min(n, m); i++) {
+    if (i === 0 && isInitialMatched) continue;
+    if (i === n - 1 && isFinalMatched) continue;
+    if (guess[i] === secretWord[i]) {
+      colors[i] = 'correct';
+    }
+  }
+
+  // Remaining pool of characters in secret word
+  const pool: string[] = [];
+  for (let i = 0; i < m; i++) {
+    let isMatchedGreen = false;
+    if (i === 0 && isInitialMatched) isMatchedGreen = true;
+    if (i === m - 1 && isFinalMatched) isMatchedGreen = true;
+    if (!isMatchedGreen && i < n && guess[i] === secretWord[i]) isMatchedGreen = true;
+    
+    if (!isMatchedGreen) {
+      pool.push(secretWord[i]);
+    }
+  }
+
+  // Character existence matches (Yellows)
+  for (let i = 0; i < n; i++) {
+    if (colors[i] === 'correct') continue;
+    const char = guess[i];
+    const poolIdx = pool.indexOf(char);
+    if (poolIdx !== -1) {
+      colors[i] = 'present';
+      pool.splice(poolIdx, 1);
+    }
+  }
+
+  return colors;
+}
+
+function submitGuess(): void {
+  if (isGameOver) return;
+  
+  const minLen = hiddenLengthMode ? 4 : secretWord.length;
+  if (currentGuess.length < minLen) {
+    showToast(`La palabra debe tener al menos ${minLen} letras`);
+    return;
+  }
+  
+  if (!isValidWord(currentGuess)) {
+    showToast('No está en el diccionario');
+    return;
+  }
+  
+  // Add guess and reset input
+  guesses.push(currentGuess);
+  const lastGuess = currentGuess;
+  currentGuess = '';
+  
+  renderBoard();
+
+  // Check Win
+  if (lastGuess === secretWord) {
+    handleWin();
+  }
+}
+
+function handleWin(): void {
+  isGameOver = true;
+  if (timeTrialMode) {
+    score++;
+    scoreCount.textContent = String(score);
+    showToast('¡Correcto! Siguiente palabra...');
+    setTimeout(() => {
+      loadNextWord();
+    }, 1000);
+  } else {
+    stopTimer();
+    modalTitle.textContent = '¡Victoria!';
+    modalDesc.textContent = `Adivinaste la palabra secreta "${secretWord}" en ${guesses.length} intentos y ${formatTime(elapsedTime)}.`;
+    modalNextBtn.classList.add('hidden');
+    modalReplayBtn.classList.remove('hidden');
+    endGameOverlay.classList.add('show');
+  }
+}
 
 // Initialize selector headers
 createHeader({ showBackButton: true, title: 'Palabra del Día' });
