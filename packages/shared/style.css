@@ -48,19 +48,23 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 10px 16px;
   border-bottom: 3px solid var(--ink);
   background-color: var(--paper-deep);
   width: 100%;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-sizing: border-box;
   transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 .sp-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 .sp-logo-link {
   font-family: 'Fraunces', serif;
@@ -70,9 +74,21 @@ html, body {
   text-decoration: none;
   letter-spacing: -0.015em;
   transition: color 0.25s ease;
+  white-space: nowrap;
 }
 .sp-logo-link:hover {
   color: var(--teal);
+}
+.sp-game-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-size: clamp(14px, 4vw, 24px);
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 .sp-back-btn {
   font-family: 'Space Mono', monospace;

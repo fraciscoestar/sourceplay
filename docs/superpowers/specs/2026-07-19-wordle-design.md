@@ -11,6 +11,9 @@ Este documento describe el diseño técnico del nuevo juego **Palabra del Día**
 ### Requisitos Clave:
 * **Entrada de texto**: Uso exclusivo del teclado nativo del dispositivo (físico en ordenadores y teclado virtual del sistema operativo en móviles). Sin teclado en pantalla propio.
 * **Control de caracteres**: Filtrar entradas no alfabéticas. Permitir `A-Z`, `Ñ`. Si el Modo Tildes está inactivo, normalizar automáticamente vocales acentuadas a su forma base (`á` -> `A`). Si está activo, tratar las tildes como caracteres independientes (`á` != `a`).
+* **Longitudes de Palabra**:
+  * Si el **Modo Difícil (Longitud Oculta)** está **desactivado**: la palabra secreta tiene una longitud fija de **5 letras** (el estándar clásico de Wordle).
+  * Si el **Modo Difícil (Longitud Oculta)** está **activado**: la longitud de la palabra secreta es variable (entre **4 y 10 letras**) y oculta al inicio.
 * **Modo Difícil (Longitud Oculta)**: No mostrar el tamaño de la palabra. Las casillas inicial y final coloreadas de verde se estilizan con bordes redondeados en los extremos para indicar el principio y fin de la palabra secreta (estilo Letroso).
 * **Modo Contrarreloj**: 5 minutos de tiempo límite. El jugador intenta adivinar tantas palabras como sea posible en secuencia, determinada por la semilla. 
   * **Penalización por salto**: Si se salta una palabra habiendo estado en ella menos de 30 segundos, se descuenta la diferencia (`30 - tiempo_empleado`) del temporizador del juego.
@@ -55,8 +58,6 @@ Sea la palabra secreta $S$ de longitud $M$ y la conjetura $G$ de longitud $N$.
   * Checkbox para **Modo Tildes**.
   * Checkbox para **Modo Difícil (Longitud Oculta)**.
   * Checkbox para **Modo Contrarreloj**.
-  * Dificultades de longitud (deshabilitadas si el modo difícil está activo):
-    * Fácil (4 letras), Medio (5 letras), Difícil (6 letras), Experto (7 letras).
   * Input de texto para **Semilla personalizada**.
   * Botón para "Empezar Partida".
 

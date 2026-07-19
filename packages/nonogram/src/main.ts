@@ -763,7 +763,7 @@ function handleKeyDown(e: KeyboardEvent): void {
 // ─────────────────────────────────────────────
 
 function initNonogram(): void {
-  createHeader({ showBackButton: true });
+  createHeader({ showBackButton: true, title: 'Nonograma' });
   buildMenuSizeDOM();
 
   document.addEventListener('keydown', handleKeyDown);

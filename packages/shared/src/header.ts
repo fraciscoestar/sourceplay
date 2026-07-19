@@ -9,7 +9,7 @@ function getRootUrl(): string {
   return '../../';
 }
 
-export function createHeader(options: { showBackButton: boolean }): void {
+export function createHeader(options: { showBackButton: boolean; title?: string }): void {
   const header = document.createElement('header');
   header.className = 'sp-header';
 
@@ -35,12 +35,22 @@ export function createHeader(options: { showBackButton: boolean }): void {
     leftDiv.appendChild(backBtn);
   }
 
-  const logo = document.createElement('a');
-  logo.href = getRootUrl();
-  logo.className = 'sp-logo-link';
-  logo.textContent = 'SourcePlay';
-  appendThemeParam(logo);
-  leftDiv.appendChild(logo);
+  if (options.title) {
+    // Game title — non-clickable label in the nav
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'sp-game-title';
+    titleSpan.textContent = options.title;
+    leftDiv.appendChild(titleSpan);
+  } else {
+    // Selector: show the SourcePlay logo link
+    const logo = document.createElement('a');
+    logo.href = getRootUrl();
+    logo.className = 'sp-logo-link';
+    logo.textContent = 'SourcePlay';
+    appendThemeParam(logo);
+    leftDiv.appendChild(logo);
+  }
+
   header.appendChild(leftDiv);
 
   // Theme toggle button with Lucide Sun and Moon SVGs
@@ -68,8 +78,6 @@ export function createHeader(options: { showBackButton: boolean }): void {
   });
 
   header.appendChild(toggleBtn);
-
-
 
   // Inject at the very beginning of the body
   if (document.body.firstChild) {

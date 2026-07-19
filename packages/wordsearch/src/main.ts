@@ -52,7 +52,7 @@ const winStatsEl = document.getElementById('winStats') as HTMLParagraphElement;
 const winReplayBtn = document.getElementById('winReplayBtn') as HTMLButtonElement;
 
 // Initialize shared header
-createHeader({ showBackButton: true });
+createHeader({ showBackButton: true, title: 'Sopa de Letras' });
 
 // Draw difficulty buttons
 function initMenu(): void {

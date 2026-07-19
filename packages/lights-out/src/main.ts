@@ -96,7 +96,7 @@ function escapeHtml(str: string): string {
 }
 
 function initGame(): void {
-  createHeader({ showBackButton: true });
+  createHeader({ showBackButton: true, title: 'Apaga las Luces' });
 
   startMenuEl = document.getElementById('startMenu')!;
   gameAreaEl = document.getElementById('gameArea')!;

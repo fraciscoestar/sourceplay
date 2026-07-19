@@ -93,7 +93,7 @@ let winReplayBtnEl: HTMLButtonElement;
  */
 function initGame(): void {
   // Inject global shared header with back-button enabled
-  createHeader({ showBackButton: true });
+  createHeader({ showBackButton: true, title: 'Rompecabezas' });
 
   // Views
   startMenuEl = document.getElementById('startMenu')!;

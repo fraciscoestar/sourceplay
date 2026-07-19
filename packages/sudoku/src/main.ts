@@ -686,7 +686,7 @@ function confirmDeleteCheckpoint(id: string): void {
 // ============ Initialization ============
 function initSudoku(): void {
   // Inyectar cabecera global compartida con botón de retroceso activo
-  createHeader({ showBackButton: true });
+  createHeader({ showBackButton: true, title: 'Sudoku' });
 
   buildBoardDOM();
   buildKeypadDOM();
