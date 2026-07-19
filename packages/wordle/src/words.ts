@@ -12,7 +12,7 @@ export function removeAccents(str: string): string {
 
 // Curated list of common nouns, verbs, adjectives with correct accents (lengths 4 to 10)
 const ACCENTED_CURATED = [
-  "CAFÉ", "BEBÉ", "SOFÁ", "MENÚ", "PAÍS", "RAÍZ", "ASÍ", "MÁS", "ALLÁ", "AQUÍ", "RÍO", "DÍA", "VÍA", "ÚTIL",
+  "CAFÉ", "BEBÉ", "SOFÁ", "MENÚ", "PAÍS", "RAÍZ", "ALLÁ", "AQUÍ", "ÚTIL",
   "ÁRBOL", "AVIÓN", "JABÓN", "RATÓN", "LIMÓN", "MELÓN", "JAPÓN", "PARÍS", "UNIÓN", "RAZÓN", "ÁNGEL", "ÚNICO",
   "LÍNEA", "VÍDEO", "ÁLBUM", "TÚNEL", "MÓVIL", "FÁCIL", "DÓLAR", "HÉROE", "MÚSICA", "CÁMARA", "PÁGINA", "MÉDICO",
   "SÁBADO", "RÁPIDO", "MÁXIMO", "MÍNIMO", "ÚLTIMO", "LÓGICO", "FÍSICO", "QUÍMICO", "ÓPTIMO", "SÓLIDO", "LÍQUIDO",
@@ -44,6 +44,17 @@ const UNACCENTED_CURATED = [
   "RECURSOS", "SOCIEDAD"
 ];
 
+// Filter curated lists to enforce length limits of 4 to 10 characters
+const VALID_ACCENTED_CURATED = ACCENTED_CURATED.filter(w => {
+  const len = removeAccents(w).length;
+  return len >= 4 && len <= 10;
+});
+
+const VALID_UNACCENTED_CURATED = UNACCENTED_CURATED.filter(w => {
+  const len = removeAccents(w).length;
+  return len >= 4 && len <= 10;
+});
+
 // Set of all normalized valid words from wordsearch for quick validation
 const VALIDATION_SET = new Set<string>();
 SPANISH_WORDS.forEach(w => {
@@ -54,8 +65,8 @@ SPANISH_WORDS.forEach(w => {
 });
 
 // Ensure all curated words are also in the validation set
-ACCENTED_CURATED.forEach(w => VALIDATION_SET.add(removeAccents(w).toUpperCase()));
-UNACCENTED_CURATED.forEach(w => VALIDATION_SET.add(removeAccents(w).toUpperCase()));
+VALID_ACCENTED_CURATED.forEach(w => VALIDATION_SET.add(removeAccents(w).toUpperCase()));
+VALID_UNACCENTED_CURATED.forEach(w => VALIDATION_SET.add(removeAccents(w).toUpperCase()));
 
 export function isValidWord(word: string): boolean {
   const normalized = removeAccents(word).toUpperCase();
@@ -65,11 +76,11 @@ export function isValidWord(word: string): boolean {
 export function getSeededWord(rng: () => number, tildesMode: boolean): string {
   if (tildesMode) {
     // Pick strictly from accented curated list
-    const idx = Math.floor(rng() * ACCENTED_CURATED.length);
-    return ACCENTED_CURATED[idx].toUpperCase();
+    const idx = Math.floor(rng() * VALID_ACCENTED_CURATED.length);
+    return VALID_ACCENTED_CURATED[idx].toUpperCase();
   } else {
     // Combine both, but strip accents when playing in normal mode
-    const combined = [...ACCENTED_CURATED, ...UNACCENTED_CURATED];
+    const combined = [...VALID_ACCENTED_CURATED, ...VALID_UNACCENTED_CURATED];
     const idx = Math.floor(rng() * combined.length);
     return removeAccents(combined[idx]).toUpperCase();
   }
