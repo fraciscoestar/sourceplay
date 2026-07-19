@@ -79,9 +79,9 @@ function filterInput(char: string): string | null {
   const mapped = removeAccents(upper);
   if (/^[A-ZÑ]$/.test(mapped)) {
     if (tildesMode) {
-      // In tildes mode, if they typed accented letter, keep it
+      // In tildes mode, if they typed a Spanish accented letter, keep it
       if (/[ÁÉÍÓÚ]/.test(upper)) return upper;
-      return upper; // standard vowels
+      return mapped;
     } else {
       // Strip accents immediately in normal mode
       return mapped;
@@ -119,6 +119,7 @@ function setupInputHandlers(): void {
 
   // Keyboard backspace and enter captures
   window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (isGameOver || document.activeElement === menuSeedInput) return;
 
     if (e.key === 'Backspace') {
