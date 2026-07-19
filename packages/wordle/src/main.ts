@@ -8,7 +8,7 @@ let prng: () => number = () => 0;
 let secretWord: string = '';
 let currentGuess: string = '';
 let guesses: string[] = [];
-let isGameOver: boolean = false;
+let isGameOver: boolean = true;
 
 // Options
 let tildesMode: boolean = false;
@@ -17,6 +17,7 @@ let timeTrialMode: boolean = false;
 
 // Timer & Scores
 let timerId: number | null = null;
+let transitionTimeoutId: number | null = null;
 let startTime: number = 0;
 let elapsedTime: number = 0; // standard stopwatch
 let timeTrialRemaining: number = 300; // 5 mins in seconds
@@ -200,6 +201,7 @@ function startGame(): void {
 }
 
 function loadNextWord(): void {
+  if (isGameOver) return;
   secretWord = getSeededWord(prng, tildesMode);
   guesses = [];
   currentGuess = '';
@@ -232,6 +234,10 @@ function stopTimer(): void {
     clearInterval(timerId);
     timerId = null;
   }
+  if (transitionTimeoutId !== null) {
+    clearTimeout(transitionTimeoutId);
+    transitionTimeoutId = null;
+  }
 }
 
 function formatTime(sec: number): string {
@@ -248,6 +254,11 @@ function handleSkipWord(): void {
     const penalty = 30 - elapsedOnWord;
     timeTrialRemaining = Math.max(0, timeTrialRemaining - penalty);
     showToast(`¡Saltado! Penalización de -${penalty}s`);
+    timerEl.textContent = formatTime(timeTrialRemaining);
+    if (timeTrialRemaining <= 0) {
+      handleTimeTrialEnd();
+      return;
+    }
   } else {
     showToast('¡Saltado!');
   }
@@ -417,7 +428,9 @@ function handleWin(): void {
     score++;
     scoreCount.textContent = String(score);
     showToast('¡Correcto! Siguiente palabra...');
-    setTimeout(() => {
+    transitionTimeoutId = window.setTimeout(() => {
+      transitionTimeoutId = null;
+      isGameOver = false;
       loadNextWord();
     }, 1000);
   } else {
@@ -438,12 +451,14 @@ restartGameBtn.addEventListener('click', startGame);
 
 exitToMenuBtn.addEventListener('click', () => {
   stopTimer();
+  isGameOver = true;
   gameArea.classList.add('hidden');
   startMenu.classList.remove('hidden');
 });
 
 modalHomeBtn.addEventListener('click', () => {
   endGameOverlay.classList.remove('show');
+  isGameOver = true;
   gameArea.classList.add('hidden');
   startMenu.classList.remove('hidden');
 });
