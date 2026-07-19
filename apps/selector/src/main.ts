@@ -43,6 +43,13 @@ const GAMES_REGISTRY: GameInfo[] = [
     description: 'Conmuta las luces de la cuadrícula hasta apagarlas todas en el menor número de movimientos.',
     url: import.meta.env.DEV ? 'http://localhost:5178/' : './games/lights-out/index.html',
     imageUrl: './assets/covers/lights-out.jpg'
+  },
+  {
+    id: 'wordle',
+    title: 'Palabra del Día',
+    description: 'Adivina la palabra secreta. Modos con tildes, longitud oculta y contrarreloj.',
+    url: import.meta.env.DEV ? 'http://localhost:5179/' : './games/wordle/index.html',
+    imageUrl: './assets/covers/wordle.jpg'
   }
 ];
 

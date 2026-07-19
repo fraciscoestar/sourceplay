@@ -78,4 +78,15 @@ if (fs.existsSync(lightsOutDist)) {
   console.warn('Advertencia: Compilación de Apaga las Luces no encontrada.');
 }
 
+const wordleDist = path.join(__dirname, '../packages/wordle/dist');
+const targetWordlePath = path.join(selectorDist, 'games/wordle');
+
+if (fs.existsSync(wordleDist)) {
+  console.log(`Copiando build de Palabra del Día de ${wordleDist} a ${targetWordlePath}...`);
+  copyDirSync(wordleDist, targetWordlePath);
+  console.log('¡Palabra del Día copiada con éxito!');
+} else {
+  console.warn('Advertencia: Compilación de Palabra del Día no encontrada.');
+}
+
 console.log('Ensamblado completado con éxito.');
