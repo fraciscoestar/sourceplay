@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es" class="sp-no-transition">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Palabra del Día — SourcePlay</title>
+  <link class="game-stylesheet" rel="stylesheet" href="/src/style.css">
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var themeParam = params.get('theme');
+        if (themeParam === 'dark' || themeParam === 'light') {
+          localStorage.setItem('sourceplay-theme', themeParam);
+        }
+      } catch (e) {}
+      var savedTheme = localStorage.getItem('sourceplay-theme');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark-theme');
+        document.documentElement.classList.remove('light-theme');
+        document.documentElement.style.colorScheme = 'dark';
+      } else {
+        document.documentElement.classList.add('light-theme');
+        document.documentElement.classList.remove('dark-theme');
+        document.documentElement.style.colorScheme = 'light';
+      }
+    })();
+  </script>
+  <script type="module">
+    import { initTheme } from '@sourceplay/shared';
+    initTheme();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <!-- START MENU -->
+    <div id="startMenu" class="view">
+      <header class="game-local-header">
+        <h1>Palabra del Día</h1>
+        <p class="menu-subtitle">Adivina la palabra secreta oculta</p>
+      </header>
+
+      <div class="menu-content">
+        <div class="options-group">
+          <label class="option-check">
+            <input type="checkbox" id="menuTildesCheck">
+            <span>Modo Tildes (Vocales con acentos importan)</span>
+          </label>
+          <label class="option-check">
+            <input type="checkbox" id="menuHiddenLengthCheck">
+            <span>Modo Difícil (Longitud oculta / Letroso)</span>
+          </label>
+          <label class="option-check">
+            <input type="checkbox" id="menuTimeTrialCheck">
+            <span>Modo Contrarreloj (5 minutos)</span>
+          </label>
+        </div>
+
+        <div class="seed-section">
+          <span class="seed-label">Semilla personalizada (opcional):</span>
+          <input type="text" id="menuSeedInput" placeholder="Escribe una semilla propia…">
+        </div>
+
+        <button class="btn primary bold-btn" id="startGameBtn">Empezar Partida</button>
+      </div>
+    </div>
+
+    <!-- PLAY AREA -->
+    <div id="gameArea" class="view hidden">
+      <header class="game-local-header">
+        <h1 id="gameTitle">Palabra del Día</h1>
+      </header>
+
+      <div class="ticket">
+        <div>Semilla&nbsp;<b id="seedLabel">—</b></div>
+        <div id="scoreLabel" class="hidden">Aciertos: <b id="scoreCount">0</b></div>
+        <div id="gameModeTags"></div>
+      </div>
+
+      <div class="board-wrap">
+        <div id="attemptsContainer" class="attempts-container">
+          <div id="board"></div>
+        </div>
+        <!-- Hidden input for typing on mobile -->
+        <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" inputmode="text" style="position: absolute; opacity: 0; pointer-events: none; left: -9999px;">
+      </div>
+
+      <div class="controls">
+        <div class="row-line" id="gameplayButtonsRow">
+          <button class="btn ghost" id="skipWordBtn">Saltar Palabra</button>
+          <button class="btn primary" id="revealWordBtn">Revelar Palabra</button>
+        </div>
+        <div class="row-line">
+          <button class="btn primary" id="restartGameBtn">Reiniciar</button>
+          <button class="btn ghost" id="exitToMenuBtn">Salir al menú</button>
+        </div>
+
+        <div class="status-row">
+          <span id="wordStatusLabel">Intentos: 0</span>
+          <span id="timer">00:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- WIN/LOSS MODAL -->
+  <div class="overlay" id="endGameOverlay">
+    <div class="modal">
+      <h2 id="modalTitle">¡Victoria!</h2>
+      <p id="modalDesc"></p>
+      <div class="row-line" style="margin-top: 18px; flex-direction: column; gap: 8px;">
+        <button class="btn primary" id="modalNextBtn" style="margin-top: 0; width: 100%;">Siguiente Palabra</button>
+        <button class="btn primary" id="modalReplayBtn" style="margin-top: 0; width: 100%;">Nueva Partida</button>
+        <button class="btn ghost" id="modalHomeBtn" style="margin-top: 0; width: 100%;">Menú Principal</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
