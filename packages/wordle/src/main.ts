@@ -133,6 +133,8 @@ function setupInputHandlers(): void {
       submitGuess();
       e.preventDefault();
     } else if (e.key.length === 1) {
+      // If mobile hidden input has focus, let the input event handle it to prevent blocking virtual keyboard
+      if (document.activeElement === hiddenInput) return;
       // Standard physical typing backup
       const filtered = filterInput(e.key);
       if (filtered) {

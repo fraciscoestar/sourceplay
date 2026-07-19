@@ -1,24 +1,22 @@
-### Task 1: Package Scaffolding & Monorepo Configuration
+### Task 1: Scaffolding `@sourceplay/wordle` package
 
 **Files:**
-- Create: `packages/lights-out/package.json`
-- Create: `packages/lights-out/tsconfig.json`
-- Create: `packages/lights-out/vite.config.ts`
-- Modify: `package.json` (Root)
-- Modify: `apps/selector/src/main.ts`
-- Modify: `scripts/assemble-build.js`
+- Create: `packages/wordle/package.json`
+- Create: `packages/wordle/tsconfig.json`
+- Create: `packages/wordle/vite.config.ts`
 
 **Interfaces:**
 - Consumes: None
-- Produces: Package registration for dev and build runs
+- Produces: Package build scripts and TS environment settings.
 
-- [ ] **Step 1: Create package configuration**
-  Create `packages/lights-out/package.json`:
+- [ ] **Step 1: Create package.json**
+  Create `packages/wordle/package.json` with the following contents:
   ```json
   {
-    "name": "@sourceplay/lights-out",
-    "version": "1.0.0",
+    "name": "@sourceplay/wordle",
     "private": true,
+    "version": "1.0.0",
+    "type": "module",
     "scripts": {
       "dev": "vite",
       "build": "tsc && vite build"
@@ -29,8 +27,8 @@
   }
   ```
 
-- [ ] **Step 2: Create TypeScript compiler config**
-  Create `packages/lights-out/tsconfig.json`:
+- [ ] **Step 2: Create tsconfig.json**
+  Create `packages/wordle/tsconfig.json` with the following contents:
   ```json
   {
     "extends": "../../tsconfig.json",
@@ -41,61 +39,30 @@
   }
   ```
 
-- [ ] **Step 3: Create Vite server configuration**
-  Create `packages/lights-out/vite.config.ts`:
+- [ ] **Step 3: Create vite.config.ts**
+  Create `packages/wordle/vite.config.ts` on port 5179:
   ```typescript
   import { defineConfig } from 'vite';
 
   export default defineConfig({
+    base: './',
     server: {
-      port: 5178
+      port: 5179
     }
   });
   ```
 
-- [ ] **Step 4: Register in root package.json**
-  Modify: `package.json` (Root). Add `"dev:lights-out": "npm run dev --workspace=@sourceplay/lights-out"` to scripts, and update the `"dev"` script to include it concurrently:
-  ```json
-  "dev": "concurrently \"npm run dev:selector\" \"npm run dev:sudoku\" \"npm run dev:nonogram\" \"npm run dev:wordsearch\" \"npm run dev:sliding-puzzle\" \"npm run dev:lights-out\"",
-  ```
+- [ ] **Step 4: Verify package setup**
+  Run compilation from root to verify the package is recognized:
+  Run: `npm run build --workspace=@sourceplay/wordle`
+  Expected: Command finishes successfully (or shows missing src errors, but no configuration syntax errors).
 
-- [ ] **Step 5: Register in games selector main page**
-  Modify: `apps/selector/src/main.ts` by adding Lights Out in the `GAMES_REGISTRY` array:
-  ```typescript
-    {
-      id: 'lights-out',
-      title: 'Apaga las Luces',
-      description: 'Conmuta las luces de la cuadrícula hasta apagarlas todas en el menor número de movimientos.',
-      url: import.meta.env.DEV ? 'http://localhost:5178/' : './games/lights-out/index.html',
-      imageUrl: './assets/covers/lights-out.jpg'
-    }
-  ```
-
-- [ ] **Step 6: Update assemble-build script**
-  Modify: `scripts/assemble-build.js` to copy compilation assets to selector dist:
-  ```javascript
-  const lightsOutDist = path.join(__dirname, '../packages/lights-out/dist');
-  const targetLightsOutPath = path.join(selectorDist, 'games/lights-out');
-
-  if (fs.existsSync(lightsOutDist)) {
-    console.log(`Copiando build de Apaga las Luces de ${lightsOutDist} a ${targetLightsOutPath}...`);
-    copyDirSync(lightsOutDist, targetLightsOutPath);
-    console.log('¡Apaga las Luces copiado con éxito!');
-  } else {
-    console.warn('Advertencia: Compilación de Apaga las Luces no encontrada.');
-  }
-  ```
-  *(Add this right after sliding-puzzle steps, before printing completion message).*
-
-- [ ] **Step 7: Run verification compile**
-  Run command: `npm run build:all`
-  Expected: Success without TS errors.
-
-- [ ] **Step 8: Commit Scaffolding**
+- [ ] **Step 5: Commit scaffolding**
   Run:
   ```bash
-  git add packages/lights-out/package.json packages/lights-out/tsconfig.json packages/lights-out/vite.config.ts package.json apps/selector/src/main.ts scripts/assemble-build.js
-  git commit -m "chore: setup lights-out workspace scaffolding"
+  git add packages/wordle/package.json packages/wordle/tsconfig.json packages/wordle/vite.config.ts
+  git commit -m "feat(wordle): scaffold packages/wordle configuration"
   ```
 
 ---
+

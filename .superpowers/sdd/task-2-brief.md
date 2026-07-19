@@ -1,306 +1,148 @@
-### Task 2: RNG and Core Mathematical Solver (TDD)
+### Task 2: Create HTML Structure
 
 **Files:**
-- Create: `packages/lights-out/src/rng.ts`
-- Create: `packages/lights-out/src/lights-out-core.ts`
-- Create: `packages/lights-out/src/test-solver.ts`
+- Create: `packages/wordle/index.html`
 
 **Interfaces:**
-- Consumes: None
-- Produces:
-  - `buildPuzzle(seedNum: number, difficultyKey: 'facil' | 'medio' | 'dificil' | 'experto'): LightsOutPuzzle`
-  - `solveLightsOut(N: number, state: number[]): number[] | null`
+- Consumes: `@sourceplay/shared` header styles and theme script.
+- Produces: The HTML skeleton of the Start Menu and Game Area.
 
-- [ ] **Step 1: Create deterministic random generator module**
-  Create `packages/lights-out/src/rng.ts`:
-  ```typescript
-  export function mulberry32(a: number): () => number {
-    return function(): number {
-      a |= 0;
-      a = (a + 0x6D2B79F5) | 0;
-      let t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
-
-  export function hashSeed(str: string): number {
-    let h = 2166136261 >>> 0;
-    for (let i = 0; i < str.length; i++) {
-      h ^= str.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return h >>> 0;
-  }
-
-  export function randomSeed(): number {
-    return (Date.now() ^ Math.floor(Math.random() * 0xFFFFFFFF)) >>> 0;
-  }
-
-  export function parseSeed(str: string): number {
-    const clean = str.trim();
-    if (/^\d+$/.test(clean)) {
-      return parseInt(clean, 10) >>> 0;
-    }
-    return hashSeed(clean);
-  }
-  ```
-
-- [ ] **Step 2: Create Lights Out Core Solver**
-  Create `packages/lights-out/src/lights-out-core.ts`:
-  ```typescript
-  import { mulberry32 } from './rng';
-
-  export type DifficultyKey = 'facil' | 'medio' | 'dificil' | 'experto';
-
-  export interface LightsOutPuzzle {
-    initialState: number[]; // 1 = on, 0 = off
-    optimalMoves: number;
-    initialClicks: number[]; // Click configurations used during generation
-    N: number;
-  }
-
-  export const SIZES = {
-    facil: 4,
-    medio: 5,
-    dificil: 7,
-    experto: 9
-  };
-
-  export const SIZES_LABELS: Record<DifficultyKey, string> = {
-    facil: 'Fácil (4×4)',
-    medio: 'Medio (5×5)',
-    dificil: 'Difícil (7×7)',
-    experto: 'Experto (9×9)'
-  };
-
-  /**
-   * Solves Lights Out using Gaussian elimination and nullspace search over GF(2).
-   * Returns binary click vector representing the optimal buttons to press.
-   */
-  export function solveLightsOut(N: number, state: number[]): number[] | null {
-    const M = N * N;
-    // Build augmented matrix M x (M + 1)
-    const matrix: number[][] = Array.from({ length: M }, () => new Array(M + 1).fill(0));
-    for (let r = 0; r < N; r++) {
-      for (let c = 0; c < N; c++) {
-        const idx = r * N + c;
-        matrix[idx][idx] = 1;
-        if (r > 0) matrix[idx][(r - 1) * N + c] = 1;
-        if (r < N - 1) matrix[idx][(r + 1) * N + c] = 1;
-        if (c > 0) matrix[idx][r * N + (c - 1)] = 1;
-        if (c < N - 1) matrix[idx][r * N + (c + 1)] = 1;
-        matrix[idx][M] = state[idx];
-      }
-    }
-
-    // Gaussian Elimination
-    const pivots = new Array(M).fill(-1);
-    let rank = 0;
-    for (let col = 0; col < M; col++) {
-      let pivotRow = -1;
-      for (let row = rank; row < M; row++) {
-        if (matrix[row][col] === 1) {
-          pivotRow = row;
-          break;
-        }
-      }
-      if (pivotRow === -1) continue;
-
-      if (pivotRow !== rank) {
-        const temp = matrix[rank];
-        matrix[rank] = matrix[pivotRow];
-        matrix[pivotRow] = temp;
-      }
-
-      pivots[col] = rank;
-
-      for (let row = 0; row < M; row++) {
-        if (row !== rank && matrix[row][col] === 1) {
-          for (let c = col; c <= M; c++) {
-            matrix[row][c] ^= matrix[rank][c];
+- [ ] **Step 1: Create index.html**
+  Create `packages/wordle/index.html` with views for the menu and the play area, along with a hidden input for mobile keyboard activation.
+  ```html
+  <!DOCTYPE html>
+  <html lang="es" class="sp-no-transition">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palabra del Día — SourcePlay</title>
+    <link class="game-stylesheet" rel="stylesheet" href="/src/style.css">
+    <script>
+      (function() {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var themeParam = params.get('theme');
+          if (themeParam === 'dark' || themeParam === 'light') {
+            localStorage.setItem('sourceplay-theme', themeParam);
           }
+        } catch (e) {}
+        var savedTheme = localStorage.getItem('sourceplay-theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add('dark-theme');
+          document.documentElement.classList.remove('light-theme');
+          document.documentElement.style.colorScheme = 'dark';
+        } else {
+          document.documentElement.classList.add('light-theme');
+          document.documentElement.classList.remove('dark-theme');
+          document.documentElement.style.colorScheme = 'light';
         }
-      }
-      rank++;
-    }
+      })();
+    </script>
+    <script type="module">
+      import { initTheme } from '@sourceplay/shared';
+      initTheme();
+    </script>
+  </head>
+  <body>
+    <div class="app">
+      <!-- START MENU -->
+      <div id="startMenu" class="view">
+        <header class="game-local-header">
+          <h1>Palabra del Día</h1>
+          <p class="menu-subtitle">Adivina la palabra secreta oculta</p>
+        </header>
 
-    // Check Solvability
-    for (let row = rank; row < M; row++) {
-      if (matrix[row][M] === 1) {
-        return null; // Unsolvable
-      }
-    }
+        <div class="menu-content">
+          <div class="options-group">
+            <label class="option-check">
+              <input type="checkbox" id="menuTildesCheck">
+              <span>Modo Tildes (Vocales con acentos importan)</span>
+            </label>
+            <label class="option-check">
+              <input type="checkbox" id="menuHiddenLengthCheck">
+              <span>Modo Difícil (Longitud oculta / Letroso)</span>
+            </label>
+            <label class="option-check">
+              <input type="checkbox" id="menuTimeTrialCheck">
+              <span>Modo Contrarreloj (5 minutos)</span>
+            </label>
+          </div>
 
-    // Particular Solution
-    const y0 = new Array(M).fill(0);
-    for (let col = 0; col < M; col++) {
-      const pRow = pivots[col];
-      if (pRow !== -1) {
-        y0[col] = matrix[pRow][M];
-      }
-    }
+          <div class="seed-section">
+            <span class="seed-label">Semilla personalizada (opcional):</span>
+            <input type="text" id="menuSeedInput" placeholder="Escribe una semilla propia…">
+          </div>
 
-    // Identify free variables to build nullspace basis
-    const freeVars: number[] = [];
-    for (let col = 0; col < M; col++) {
-      if (pivots[col] === -1) {
-        freeVars.push(col);
-      }
-    }
+          <button class="btn primary bold-btn" id="startGameBtn">Empezar Partida</button>
+        </div>
+      </div>
 
-    const basis: number[][] = [];
-    for (const freeCol of freeVars) {
-      const vec = new Array(M).fill(0);
-      vec[freeCol] = 1;
-      for (let col = 0; col < M; col++) {
-        const pRow = pivots[col];
-        if (pRow !== -1) {
-          vec[col] = matrix[pRow][freeCol];
-        }
-      }
-      basis.push(vec);
-    }
+      <!-- PLAY AREA -->
+      <div id="gameArea" class="view hidden">
+        <header class="game-local-header">
+          <h1 id="gameTitle">Palabra del Día</h1>
+        </header>
 
-    // Find combination of nullspace vectors that minimizes click count (Hamming weight)
-    let bestSolution = [...y0];
-    let minWeight = y0.reduce((sum, val) => sum + val, 0);
+        <div class="ticket">
+          <div>Semilla&nbsp;<b id="seedLabel">—</b></div>
+          <div id="scoreLabel" class="hidden">Aciertos: <b id="scoreCount">0</b></div>
+          <div id="gameModeTags"></div>
+        </div>
 
-    const numCombinations = 1 << basis.length;
-    for (let i = 1; i < numCombinations; i++) {
-      const current = [...y0];
-      for (let j = 0; j < basis.length; j++) {
-        if ((i >> j) & 1) {
-          for (let idx = 0; idx < M; idx++) {
-            current[idx] ^= basis[j][idx];
-          }
-        }
-      }
-      const weight = current.reduce((sum, val) => sum + val, 0);
-      if (weight < minWeight) {
-        minWeight = weight;
-        bestSolution = current;
-      }
-    }
+        <div class="board-wrap">
+          <div id="attemptsContainer" class="attempts-container">
+            <div id="board"></div>
+          </div>
+          <!-- Hidden input for typing on mobile -->
+          <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" inputmode="text" style="position: absolute; opacity: 0; pointer-events: none; left: -9999px;">
+        </div>
 
-    return bestSolution;
-  }
+        <div class="controls">
+          <div class="row-line" id="gameplayButtonsRow">
+            <button class="btn ghost" id="skipWordBtn">Saltar Palabra</button>
+            <button class="btn primary" id="revealWordBtn">Revelar Palabra</button>
+          </div>
+          <div class="row-line">
+            <button class="btn primary" id="restartGameBtn">Reiniciar</button>
+            <button class="btn ghost" id="exitToMenuBtn">Salir al menú</button>
+          </div>
 
-  /**
-   * Generates a guaranteed solvable Lights Out board using random clicks.
-   */
-  export function buildPuzzle(seedNum: number, difficultyKey: DifficultyKey): LightsOutPuzzle {
-    const N = SIZES[difficultyKey];
-    const M = N * N;
-    const rng = mulberry32(seedNum);
+          <div class="status-row">
+            <span id="wordStatusLabel">Intentos: 0</span>
+            <span id="timer">00:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    let initialState = new Array(M).fill(0);
-    let initialClicks = new Array(M).fill(0);
+    <!-- NOTIFICATION TOAST -->
+    <div class="toast" id="toast"></div>
 
-    let attempts = 0;
-    while (attempts < 100) {
-      initialClicks = new Array(M).fill(0);
-      initialState = new Array(M).fill(0);
+    <!-- WIN/LOSS MODAL -->
+    <div class="overlay" id="endGameOverlay">
+      <div class="modal">
+        <h2 id="modalTitle">¡Victoria!</h2>
+        <p id="modalDesc"></p>
+        <div class="row-line" style="margin-top: 18px; flex-direction: column; gap: 8px;">
+          <button class="btn primary" id="modalNextBtn" style="margin-top: 0; width: 100%;">Siguiente Palabra</button>
+          <button class="btn primary" id="modalReplayBtn" style="margin-top: 0; width: 100%;">Nueva Partida</button>
+          <button class="btn ghost" id="modalHomeBtn" style="margin-top: 0; width: 100%;">Menú Principal</button>
+        </div>
+      </div>
+    </div>
 
-      for (let i = 0; i < M; i++) {
-        initialClicks[i] = rng() < 0.5 ? 1 : 0;
-      }
-
-      for (let i = 0; i < M; i++) {
-        if (initialClicks[i] === 1) {
-          const r = Math.floor(i / N);
-          const c = i % N;
-          initialState[i] ^= 1;
-          if (r > 0) initialState[(r - 1) * N + c] ^= 1;
-          if (r < N - 1) initialState[(r + 1) * N + c] ^= 1;
-          if (c > 0) initialState[r * N + (c - 1)] ^= 1;
-          if (c < N - 1) initialState[r * N + (c + 1)] ^= 1;
-        }
-      }
-
-      const activeCount = initialState.reduce((sum, val) => sum + val, 0);
-      if (activeCount > 0) {
-        break;
-      }
-      attempts++;
-    }
-
-    const optimalSol = solveLightsOut(N, initialState);
-    const optimalMoves = optimalSol ? optimalSol.reduce((sum, val) => sum + val, 0) : 0;
-
-    return { initialState, optimalMoves, initialClicks, N };
-  }
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+  </html>
   ```
 
-- [ ] **Step 3: Create automated verification test script**
-  Create `packages/lights-out/src/test-solver.ts`:
-  ```typescript
-  import { solveLightsOut, buildPuzzle } from './lights-out-core';
-
-  function assert(condition: boolean, msg: string) {
-    if (!condition) {
-      throw new Error(`Assertion failed: ${msg}`);
-    }
-  }
-
-  console.log("Running solver mathematical checks...");
-
-  // 1. Solve basic unsolvable/solvable cases
-  // A simple 2x2 grid (N=2) which toggle cell and neighbors.
-  // Click matrix A for 2x2:
-  // [ 1 1 1 0 ]
-  // [ 1 1 0 1 ]
-  // [ 1 0 1 1 ]
-  // [ 0 1 1 1 ]
-  // All rows sum to 1 + 1 + 1 = 3 = 1.
-  const solvedState = [0, 0, 0, 0];
-  const clicks = solveLightsOut(2, solvedState);
-  assert(clicks !== null && clicks.reduce((s, v) => s + v, 0) === 0, "Empty board should take 0 clicks");
-
-  const singleOn = [1, 0, 0, 0];
-  const singleClicks = solveLightsOut(2, singleOn);
-  assert(singleClicks !== null, "2x2 single cell ON is solvable");
-
-  // 2. Verification of optimal move calculations for all sizes
-  const sizes: ('facil' | 'medio' | 'dificil' | 'experto')[] = ['facil', 'medio', 'dificil', 'experto'];
-  for (const sz of sizes) {
-    const puzzle = buildPuzzle(12345, sz);
-    console.log(`- Difficulty ${sz} (N=${puzzle.N}): optimal moves = ${puzzle.optimalMoves}`);
-    
-    // Verify that applying the optimal clicks to initial state clears the board
-    const N = puzzle.N;
-    const current = [...puzzle.initialState];
-    const optClicks = solveLightsOut(N, current);
-    assert(optClicks !== null, `Puzzle of size ${N} must be solvable`);
-
-    // Simulate clicking the solved output
-    for (let i = 0; i < optClicks!.length; i++) {
-      if (optClicks![i] === 1) {
-        const r = Math.floor(i / N);
-        const c = i % N;
-        current[i] ^= 1;
-        if (r > 0) current[(r - 1) * N + c] ^= 1;
-        if (r < N - 1) current[(r + 1) * N + c] ^= 1;
-        if (c > 0) current[r * N + (c - 1)] ^= 1;
-        if (c < N - 1) current[r * N + (c + 1)] ^= 1;
-      }
-    }
-    const sum = current.reduce((s, v) => s + v, 0);
-    assert(sum === 0, `Applying optimal clicks should completely turn off all lights for size ${N}`);
-  }
-
-  console.log("ALL MATHEMATICAL TESTS PASSED!");
-  ```
-
-- [ ] **Step 4: Execute TDD Tests**
-  Run: `npx tsx packages/lights-out/src/test-solver.ts`
-  Expected: "ALL MATHEMATICAL TESTS PASSED!" output.
-
-- [ ] **Step 5: Commit TDD Core**
+- [ ] **Step 2: Commit HTML**
   Run:
   ```bash
-  git add packages/lights-out/src/rng.ts packages/lights-out/src/lights-out-core.ts packages/lights-out/src/test-solver.ts
-  git commit -m "feat: add RNG, linear algebra solver, and verification tests for Lights Out"
+  git add packages/wordle/index.html
+  git commit -m "feat(wordle): add game index.html structure"
   ```
 
 ---
+

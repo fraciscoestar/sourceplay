@@ -6,5 +6,5 @@
 - [x] Task 4: Styling and Themes (CSS)
 - [x] Task 5: Core Typing Logic & Hidden Input Integration
 - [x] Task 6: Grid Rendering & Accent/Letroso Comparison Algorithm
-- [ ] Task 7: Game Lifecycle, Time Trial, and Stopwatch Timer
-- [ ] Task 8: App Registration & Build Script Modifications
+- [x] Task 7: Game Lifecycle, Time Trial, and Stopwatch Timer
+- [x] Task 8: App Registration & Build Script Modifications
