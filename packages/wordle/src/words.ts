@@ -30,13 +30,12 @@ export const RAW_DICTIONARY_SET = new Set<string>();
 
 function processWord(w: string) {
   const upper = w.toUpperCase();
-  if (upper === 'CASASES') return;
   const normalized = removeAccents(upper);
 
   for (const entry of [upper, normalized]) {
     const inflections = getInflections(entry);
     for (const item of inflections) {
-      if (item.length >= 4 && item.length <= 10 && item !== 'CASASES' && removeAccents(item) !== 'CASASES') {
+      if (item.length >= 4 && item.length <= 10) {
         RAW_DICTIONARY_SET.add(item);
         RAW_DICTIONARY_SET.add(removeAccents(item));
       }
