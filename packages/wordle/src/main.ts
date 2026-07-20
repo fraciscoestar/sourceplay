@@ -1,6 +1,6 @@
 import { createHeader } from '@sourceplay/shared';
 import { mulberry32, parseSeed, randomSeed } from './rng';
-import { getSeededWord, isValidWord, removeAccents } from './words';
+import { getSeededWord, isTooShort, isValidWord, removeAccents } from './words';
 
 // State
 let seedNum: number = 0;
@@ -399,6 +399,11 @@ function evaluateGuessColors(guess: string): string[] {
 
 function submitGuess(): void {
   if (isGameOver) return;
+
+  if (isTooShort(currentGuess)) {
+    showToast('La palabra debe tener al menos 4 letras');
+    return;
+  }
   
   const minLen = hiddenLengthMode ? 4 : secretWord.length;
   if (currentGuess.length < minLen) {
