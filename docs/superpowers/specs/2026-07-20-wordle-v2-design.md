@@ -1,7 +1,7 @@
 # Design Spec: Palabra del Día (Wordle Clone) v2 Improvements
 
 ## 1. Overview & Goals
-Upgrade the Palabra del Día game to address dictionary limitations, improve keyboard interaction, fix tile animation rendering bugs, and introduce tile-level focus selection in normal mode.
+Upgrade the Palabra del Día game to address dictionary limitations, improve keyboard interaction, fix tile animation rendering bugs, and introduce tile-level focus selection in both normal mode and Letroso mode.
 
 ---
 
@@ -34,22 +34,24 @@ Upgrade the Palabra del Día game to address dictionary limitations, improve key
 
 ---
 
-## 4. Normal Mode: Tile Selection & Free Gap Filling
-- **Tile Focus Selection**:
+## 4. Tile Selection & Out-of-Order Gap Filling
+- **Normal Mode Tile Selection**:
   - Active attempt row renders `L` tiles (where `L` is secret word length).
   - Clicking any tile in the active row selects it (`selectedIndex`), adding a `.selected` outline style.
   - Typing a letter replaces/fills the character at `selectedIndex` and advances focus to the next empty tile.
   - Allows players to fill known clues first (e.g. 1st and 4th position) and fill remaining blank slots afterwards.
-- **Backspace & Delete Behavior**:
-  - Backspace clears character at `selectedIndex` (or previous tile if current tile is blank) and moves focus backwards.
+- **Letroso Mode Tile Selection & Editing**:
+  - Starts with **0 tiles** (no empty placeholder boxes).
+  - As characters are typed, tiles appear dynamically (1, 2, 3...).
+  - Once tiles exist, clicking any existing tile in the active row selects it (`selectedIndex`) for targeted replacement or editing.
+  - Typing when `selectedIndex` points to an existing tile replaces that character. Typing when focused after the last tile appends a new tile (up to max 10).
+- **Backspace Behavior**:
+  - Backspace clears/removes character at `selectedIndex` and shifts focus backwards.
 
 ---
 
-## 5. Letroso Mode & Tile Animation Fixes
-- **Letroso Zero-Tile Initial State**:
-  - Active attempt row in Letroso mode starts with **0 tiles** (no empty placeholder boxes).
-  - Tiles appear dynamically one by one as characters are typed (1, 2, 3...).
-- **Tile Animation Pop Overflow Fix**:
+## 5. Tile Animation Overflow Fixes
+- **Tile Animation Pop Fix**:
   - Adjust `.tile.pop` keyframes animation transform scale from `1.15` down to `1.05` with `box-shadow` inset emphasis.
   - Add `overflow-y: auto; overflow-x: hidden;` and padded borders on `.attempts-container` to prevent popped tile borders from clipping under container boundaries.
 
@@ -58,6 +60,8 @@ Upgrade the Palabra del Día game to address dictionary limitations, improve key
 ## 6. Verification & Test Plan
 1. **Dictionary Test**: Verify common and rare words (e.g., "ZANGANO", "ECOLOGIA") are validated successfully, while non-words are rejected.
 2. **Keyboard Test**: Verify keys update colors (correct/present/absent) and Tildes row `Á É Í Ó Ú` toggles with `tildesMode`.
-3. **Tile Selection Test**: Click 3rd box in normal mode, type letter, confirm only 3rd box fills and focus moves to 4th.
+3. **Tile Selection Test (Normal & Letroso)**:
+   - Normal: Click 3rd box, type letter, confirm 3rd box fills and focus moves to 4th.
+   - Letroso: Type 3 letters, click 1st tile, type new letter, confirm 1st tile updates.
 4. **Short Word Test**: Type 2 letters, hit Enter, confirm toast appears and guess is not submitted.
 5. **Build Test**: Run `npx tsc` and `npm run build:all` to ensure zero compilation errors across monorepo.
