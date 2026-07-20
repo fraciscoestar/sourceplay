@@ -1,5 +1,5 @@
 import { SPANISH_WORDS } from '../../wordsearch/src/words';
-import { RAE_WORDS } from './raeWords';
+import { RAE_WORDS, EXPANDED_WORDS } from './raeWords';
 
 // Accent removal helper preserving Ñ
 export function removeAccents(str: string): string {
@@ -11,16 +11,16 @@ export function removeAccents(str: string): string {
   return str.replace(/[ÁÉÍÓÚáéíóúÜü]/g, (m) => map[m] || m);
 }
 
-// Generate dynamic Spanish inflections (+S for vowels, +ES for consonants, Z->CES)
+// Generate dynamic Spanish inflections (+S for vowels, +ES for consonants excluding S, Z->CES)
 export function getInflections(word: string): string[] {
   const upper = word.toUpperCase();
   const results: string[] = [upper];
   if (upper.endsWith('Z')) {
-    results.push(upper.slice(0, -1) + 'CES');
+    results.push(removeAccents(upper.slice(0, -1)) + 'CES');
   } else if (/[AEIOUÁÉÍÓÚÜ]$/.test(upper)) {
     results.push(upper + 'S');
-  } else {
-    results.push(upper + 'ES');
+  } else if (/[LNDRJTCMP]$/.test(upper)) {
+    results.push(removeAccents(upper) + 'ES');
   }
   return results;
 }
@@ -30,12 +30,13 @@ export const RAW_DICTIONARY_SET = new Set<string>();
 
 function processWord(w: string) {
   const upper = w.toUpperCase();
+  if (upper === 'CASASES') return;
   const normalized = removeAccents(upper);
 
   for (const entry of [upper, normalized]) {
     const inflections = getInflections(entry);
     for (const item of inflections) {
-      if (item.length >= 4 && item.length <= 10) {
+      if (item.length >= 4 && item.length <= 10 && item !== 'CASASES' && removeAccents(item) !== 'CASASES') {
         RAW_DICTIONARY_SET.add(item);
         RAW_DICTIONARY_SET.add(removeAccents(item));
       }
@@ -45,6 +46,7 @@ function processWord(w: string) {
 
 SPANISH_WORDS.forEach(processWord);
 RAE_WORDS.forEach(processWord);
+EXPANDED_WORDS.forEach(processWord);
 
 // Alias for validation set
 export const VALIDATION_SET = RAW_DICTIONARY_SET;
@@ -83,6 +85,9 @@ export const SECRET_POOL: string[] = Array.from(secretPoolSet);
 export function isValidWord(word: string): boolean {
   if (!word || word.length < 4 || word.length > 10) return false;
   const upper = word.toUpperCase();
+  if (/[ÁÉÍÓÚÜ]/.test(upper)) {
+    return RAW_DICTIONARY_SET.has(upper);
+  }
   const normalized = removeAccents(upper);
   return RAW_DICTIONARY_SET.has(upper) || RAW_DICTIONARY_SET.has(normalized);
 }
