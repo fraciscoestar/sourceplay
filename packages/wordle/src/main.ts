@@ -9,6 +9,7 @@ let secretWord: string = '';
 let currentGuess: string = '';
 let guesses: string[] = [];
 let isGameOver: boolean = true;
+let selectedIndex: number = 0;
 
 // Options
 let tildesMode: boolean = false;
@@ -94,6 +95,67 @@ function filterInput(char: string): string | null {
   return null;
 }
 
+function insertCharacter(char: string): void {
+  if (isGameOver) return;
+  const maxLen = hiddenLengthMode ? 10 : secretWord.length;
+  let chars = currentGuess.split('');
+  
+  if (hiddenLengthMode) {
+    if (selectedIndex < chars.length) {
+      chars[selectedIndex] = char;
+      selectedIndex = Math.min(selectedIndex + 1, maxLen);
+    } else if (chars.length < maxLen) {
+      chars.push(char);
+      selectedIndex = chars.length;
+    }
+  } else {
+    while (chars.length < maxLen) chars.push(' ');
+    chars[selectedIndex] = char;
+    // Advance selectedIndex to next empty tile
+    let nextEmpty = chars.findIndex((c, i) => i > selectedIndex && (c === ' ' || c === ''));
+    if (nextEmpty !== -1) {
+      selectedIndex = nextEmpty;
+    } else if (selectedIndex < maxLen - 1) {
+      selectedIndex++;
+    }
+  }
+  currentGuess = chars.join('').trimEnd();
+  renderBoard();
+}
+
+function handleBackspace(): void {
+  if (isGameOver) return;
+  let chars = currentGuess.split('');
+  if (hiddenLengthMode) {
+    if (selectedIndex < chars.length) {
+      if (chars[selectedIndex] && chars[selectedIndex] !== ' ') {
+        chars.splice(selectedIndex, 1);
+      } else if (selectedIndex > 0) {
+        selectedIndex--;
+        chars.splice(selectedIndex, 1);
+      }
+      if (selectedIndex > chars.length) {
+        selectedIndex = chars.length;
+      }
+    } else if (chars.length > 0) {
+      chars.pop();
+      selectedIndex = chars.length;
+    }
+  } else {
+    const maxLen = secretWord.length;
+    while (chars.length < maxLen) chars.push(' ');
+    
+    if (chars[selectedIndex] && chars[selectedIndex] !== ' ') {
+      chars[selectedIndex] = ' ';
+    } else if (selectedIndex > 0) {
+      selectedIndex--;
+      chars[selectedIndex] = ' ';
+    }
+  }
+  currentGuess = chars.join('').trimEnd();
+  renderBoard();
+}
+
 // Setup Hidden Input listeners for Mobile & Keyboard Capture
 function setupInputHandlers(): void {
   // Focus hidden input when clicking anywhere on the board
@@ -111,29 +173,35 @@ function setupInputHandlers(): void {
       const lastChar = val[val.length - 1];
       const filtered = filterInput(lastChar);
       if (filtered) {
-        const maxLen = hiddenLengthMode ? 10 : secretWord.length;
-        if (currentGuess.length < maxLen) {
-          currentGuess += filtered;
-          renderBoard();
-        }
+        insertCharacter(filtered);
       }
       hiddenInput.value = ''; // Reset input buffer
     }
   });
 
-  // Keyboard backspace and enter captures
+  // Keyboard backspace, enter, and arrow captures
   window.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (isGameOver || document.activeElement === menuSeedInput) return;
 
     if (e.key === 'Backspace') {
-      if (currentGuess.length > 0) {
-        currentGuess = currentGuess.slice(0, -1);
-        renderBoard();
-      }
+      handleBackspace();
       e.preventDefault();
     } else if (e.key === 'Enter') {
       submitGuess();
+      e.preventDefault();
+    } else if (e.key === 'ArrowLeft') {
+      if (!hiddenLengthMode && selectedIndex > 0) {
+        selectedIndex--;
+        renderBoard();
+      }
+      e.preventDefault();
+    } else if (e.key === 'ArrowRight') {
+      const maxLen = hiddenLengthMode ? 10 : secretWord.length;
+      if (!hiddenLengthMode && selectedIndex < maxLen - 1) {
+        selectedIndex++;
+        renderBoard();
+      }
       e.preventDefault();
     } else if (e.key.length === 1) {
       // If mobile hidden input has focus, let the input event handle it to prevent blocking virtual keyboard
@@ -141,11 +209,7 @@ function setupInputHandlers(): void {
       // Standard physical typing backup
       const filtered = filterInput(e.key);
       if (filtered) {
-        const maxLen = hiddenLengthMode ? 10 : secretWord.length;
-        if (currentGuess.length < maxLen) {
-          currentGuess += filtered;
-          renderBoard();
-        }
+        insertCharacter(filtered);
       }
       e.preventDefault();
     }
@@ -165,6 +229,7 @@ function startGame(): void {
   
   guesses = [];
   currentGuess = '';
+  selectedIndex = 0;
   isGameOver = false;
   score = 0;
   elapsedTime = 0;
@@ -210,18 +275,11 @@ function handleVirtualKeyPress(k: string): void {
   if (k === 'ENTER') {
     submitGuess();
   } else if (k === '⌫') {
-    if (currentGuess.length > 0) {
-      currentGuess = currentGuess.slice(0, -1);
-      renderBoard();
-    }
+    handleBackspace();
   } else {
     const filtered = filterInput(k);
     if (filtered) {
-      const maxLen = hiddenLengthMode ? 10 : secretWord.length;
-      if (currentGuess.length < maxLen) {
-        currentGuess += filtered;
-        renderBoard();
-      }
+      insertCharacter(filtered);
     }
   }
 }
@@ -286,6 +344,7 @@ function loadNextWord(): void {
   secretWord = getSeededWord(prng, tildesMode);
   guesses = [];
   currentGuess = '';
+  selectedIndex = 0;
   isGameOver = false;
   wordStartTime = Date.now(); // track start time of this word
   keyStatuses.clear();
@@ -400,20 +459,38 @@ function renderBoard(): void {
   // 2. Render current active guess row
   if (!isGameOver) {
     const activeRow = document.createElement('div');
-    activeRow.className = 'row-guess';
+    activeRow.className = 'row-guess active-row';
     
-    const lengthToDraw = hiddenLengthMode ? Math.max(4, currentGuess.length) : secretWord.length;
-    for (let i = 0; i < lengthToDraw; i++) {
+    const targetLen = hiddenLengthMode ? Math.max(4, currentGuess.length) : secretWord.length;
+    if (selectedIndex >= targetLen) {
+      selectedIndex = Math.max(0, targetLen - 1);
+    }
+
+    const chars = currentGuess.split('');
+    while (chars.length < targetLen) {
+      chars.push('');
+    }
+    
+    chars.forEach((ch, idx) => {
       const tile = document.createElement('div');
       tile.className = 'tile';
-      if (i < currentGuess.length) {
-        tile.textContent = currentGuess[i];
+      if (ch && ch !== ' ') {
+        tile.textContent = ch;
         tile.classList.add('pop'); // Trigger CSS scaling
       } else {
         tile.textContent = '';
       }
+      if (idx === selectedIndex) {
+        tile.classList.add('selected');
+      }
+      tile.addEventListener('click', () => {
+        if (isGameOver) return;
+        selectedIndex = idx;
+        renderBoard();
+        setTimeout(() => hiddenInput.focus(), 10);
+      });
       activeRow.appendChild(tile);
-    }
+    });
     board.appendChild(activeRow);
   }
   
@@ -481,13 +558,15 @@ function evaluateGuessColors(guess: string): string[] {
 function submitGuess(): void {
   if (isGameOver) return;
 
-  if (isTooShort(currentGuess)) {
+  const cleanGuess = currentGuess.replace(/ /g, '');
+
+  if (isTooShort(cleanGuess)) {
     showToast('La palabra debe tener al menos 4 letras');
     return;
   }
   
   const minLen = hiddenLengthMode ? 4 : secretWord.length;
-  if (currentGuess.length < minLen) {
+  if (currentGuess.length < minLen || (!hiddenLengthMode && (currentGuess.includes(' ') || currentGuess.length < secretWord.length))) {
     showToast(`La palabra debe tener al menos ${minLen} letras`);
     return;
   }
@@ -501,6 +580,7 @@ function submitGuess(): void {
   guesses.push(currentGuess);
   const lastGuess = currentGuess;
   currentGuess = '';
+  selectedIndex = 0;
   
   renderBoard();
   updateKeyboardColors();

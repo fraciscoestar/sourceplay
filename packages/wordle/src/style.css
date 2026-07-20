@@ -151,6 +151,12 @@ body {
   transform: scale(1.1);
 }
 
+.tile.selected {
+  border-color: #2196f3 !important;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.4);
+  transform: scale(1.03);
+}
+
 /* Tile result states */
 .tile.correct {
   background-color: var(--teal) !important;
