@@ -1,148 +1,163 @@
-### Task 2: Create HTML Structure
+### Task 2: On-Screen Virtual Keyboard UI & Accents Row
 
 **Files:**
-- Create: `packages/wordle/index.html`
+- Modify: `packages/wordle/index.html`
+- Modify: `packages/wordle/src/style.css`
+- Modify: `packages/wordle/src/main.ts`
 
 **Interfaces:**
-- Consumes: `@sourceplay/shared` header styles and theme script.
-- Produces: The HTML skeleton of the Start Menu and Game Area.
+- Consumes: `tildesMode: boolean`, `guesses: string[]`, `secretWord: string`
+- Produces: `renderKeyboard()` function, `updateKeyboardColors()` function, `#keyboard` HTML container, `.key` interactive styles.
 
-- [ ] **Step 1: Create index.html**
-  Create `packages/wordle/index.html` with views for the menu and the play area, along with a hidden input for mobile keyboard activation.
-  ```html
-  <!DOCTYPE html>
-  <html lang="es" class="sp-no-transition">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Palabra del Día — SourcePlay</title>
-    <link class="game-stylesheet" rel="stylesheet" href="/src/style.css">
-    <script>
-      (function() {
-        try {
-          var params = new URLSearchParams(window.location.search);
-          var themeParam = params.get('theme');
-          if (themeParam === 'dark' || themeParam === 'light') {
-            localStorage.setItem('sourceplay-theme', themeParam);
-          }
-        } catch (e) {}
-        var savedTheme = localStorage.getItem('sourceplay-theme');
-        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-          document.documentElement.classList.add('dark-theme');
-          document.documentElement.classList.remove('light-theme');
-          document.documentElement.style.colorScheme = 'dark';
-        } else {
-          document.documentElement.classList.add('light-theme');
-          document.documentElement.classList.remove('dark-theme');
-          document.documentElement.style.colorScheme = 'light';
-        }
-      })();
-    </script>
-    <script type="module">
-      import { initTheme } from '@sourceplay/shared';
-      initTheme();
-    </script>
-  </head>
-  <body>
-    <div class="app">
-      <!-- START MENU -->
-      <div id="startMenu" class="view">
-        <header class="game-local-header">
-          <h1>Palabra del Día</h1>
-          <p class="menu-subtitle">Adivina la palabra secreta oculta</p>
-        </header>
+- [ ] **Step 1: Add Keyboard container to `packages/wordle/index.html`**
 
-        <div class="menu-content">
-          <div class="options-group">
-            <label class="option-check">
-              <input type="checkbox" id="menuTildesCheck">
-              <span>Modo Tildes (Vocales con acentos importan)</span>
-            </label>
-            <label class="option-check">
-              <input type="checkbox" id="menuHiddenLengthCheck">
-              <span>Modo Difícil (Longitud oculta / Letroso)</span>
-            </label>
-            <label class="option-check">
-              <input type="checkbox" id="menuTimeTrialCheck">
-              <span>Modo Contrarreloj (5 minutos)</span>
-            </label>
-          </div>
+```html
+<!-- Inside #gameArea below #board -->
+<div id="keyboard" class="keyboard-container"></div>
+```
 
-          <div class="seed-section">
-            <span class="seed-label">Semilla personalizada (opcional):</span>
-            <input type="text" id="menuSeedInput" placeholder="Escribe una semilla propia…">
-          </div>
+- [ ] **Step 2: Add Virtual Keyboard styles in `packages/wordle/src/style.css`**
 
-          <button class="btn primary bold-btn" id="startGameBtn">Empezar Partida</button>
-        </div>
-      </div>
+```css
+.keyboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 500px;
+  margin: 12px auto 0 auto;
+  padding: 0 8px;
+  user-select: none;
+}
 
-      <!-- PLAY AREA -->
-      <div id="gameArea" class="view hidden">
-        <header class="game-local-header">
-          <h1 id="gameTitle">Palabra del Día</h1>
-        </header>
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
 
-        <div class="ticket">
-          <div>Semilla&nbsp;<b id="seedLabel">—</b></div>
-          <div id="scoreLabel" class="hidden">Aciertos: <b id="scoreCount">0</b></div>
-          <div id="gameModeTags"></div>
-        </div>
+.key {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  height: 48px;
+  flex: 1;
+  min-width: 28px;
+  max-width: 44px;
+  border-radius: 6px;
+  border: 1px solid var(--paper-border, #d1c7bd);
+  background: var(--paper-bg-card, #f4efe6);
+  color: var(--ink-main, #2c2523);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
 
-        <div class="board-wrap">
-          <div id="attemptsContainer" class="attempts-container">
-            <div id="board"></div>
-          </div>
-          <!-- Hidden input for typing on mobile -->
-          <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" inputmode="text" style="position: absolute; opacity: 0; pointer-events: none; left: -9999px;">
-        </div>
+.key.key-wide {
+  max-width: 64px;
+  flex: 1.5;
+  font-size: 0.8rem;
+}
 
-        <div class="controls">
-          <div class="row-line" id="gameplayButtonsRow">
-            <button class="btn ghost" id="skipWordBtn">Saltar Palabra</button>
-            <button class="btn primary" id="revealWordBtn">Revelar Palabra</button>
-          </div>
-          <div class="row-line">
-            <button class="btn primary" id="restartGameBtn">Reiniciar</button>
-            <button class="btn ghost" id="exitToMenuBtn">Salir al menú</button>
-          </div>
+.key:active {
+  transform: scale(0.95);
+}
 
-          <div class="status-row">
-            <span id="wordStatusLabel">Intentos: 0</span>
-            <span id="timer">00:00</span>
-          </div>
-        </div>
-      </div>
-    </div>
+.key.correct {
+  background: #2e7d32 !important;
+  color: #ffffff !important;
+  border-color: #1b5e20 !important;
+}
 
-    <!-- NOTIFICATION TOAST -->
-    <div class="toast" id="toast"></div>
+.key.present {
+  background: #f57f17 !important;
+  color: #ffffff !important;
+  border-color: #f57f17 !important;
+}
 
-    <!-- WIN/LOSS MODAL -->
-    <div class="overlay" id="endGameOverlay">
-      <div class="modal">
-        <h2 id="modalTitle">¡Victoria!</h2>
-        <p id="modalDesc"></p>
-        <div class="row-line" style="margin-top: 18px; flex-direction: column; gap: 8px;">
-          <button class="btn primary" id="modalNextBtn" style="margin-top: 0; width: 100%;">Siguiente Palabra</button>
-          <button class="btn primary" id="modalReplayBtn" style="margin-top: 0; width: 100%;">Nueva Partida</button>
-          <button class="btn ghost" id="modalHomeBtn" style="margin-top: 0; width: 100%;">Menú Principal</button>
-        </div>
-      </div>
-    </div>
+.key.absent {
+  background: #757575 !important;
+  color: #e0e0e0 !important;
+  opacity: 0.6;
+}
+```
 
-    <script type="module" src="/src/main.ts"></script>
-  </body>
-  </html>
-  ```
+- [ ] **Step 3: Render and bind On-Screen Virtual Keyboard in `packages/wordle/src/main.ts`**
 
-- [ ] **Step 2: Commit HTML**
-  Run:
-  ```bash
-  git add packages/wordle/index.html
-  git commit -m "feat(wordle): add game index.html structure"
-  ```
+```typescript
+const keyboardEl = document.getElementById('keyboard') as HTMLDivElement;
+const keyStatuses = new Map<string, 'correct' | 'present' | 'absent'>();
+
+function renderKeyboard(): void {
+  keyboardEl.innerHTML = '';
+  const rows = [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L','Ñ'],
+    ['ENTER','Z','X','C','V','B','N','M','⌫']
+  ];
+  if (tildesMode) {
+    rows.push(['Á','É','Í','Ó','Ú']);
+  }
+
+  rows.forEach(row => {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'keyboard-row';
+    row.forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'key';
+      if (k === 'ENTER' || k === '⌫') {
+        btn.classList.add('key-wide');
+      }
+      btn.textContent = k;
+      const status = keyStatuses.get(k);
+      if (status) {
+        btn.classList.add(status);
+      }
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleVirtualKeyPress(k);
+      });
+      rowDiv.appendChild(btn);
+    });
+    keyboardEl.appendChild(rowDiv);
+  });
+}
+
+function updateKeyboardColors(): void {
+  // Process guesses to populate keyStatuses map
+  guesses.forEach(g => {
+    const colors = evaluateGuessColors(g, secretWord);
+    for (let i = 0; i < g.length; i++) {
+      const char = g[i];
+      const col = colors[i];
+      const prev = keyStatuses.get(char);
+      if (col === 'correct') {
+        keyStatuses.set(char, 'correct');
+      } else if (col === 'present' && prev !== 'correct') {
+        keyStatuses.set(char, 'present');
+      } else if (col === 'absent' && !prev) {
+        keyStatuses.set(char, 'absent');
+      }
+    }
+  });
+  renderKeyboard();
+}
+```
+
+- [ ] **Step 4: Verify TypeScript compilation**
+
+Run: `npx tsc --noEmit -p packages/wordle/tsconfig.json`
+Expected: PASS (0 errors)
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add packages/wordle/index.html packages/wordle/src/style.css packages/wordle/src/main.ts
+git commit -m "feat(wordle): add on-screen QWERTY virtual keyboard with tildes row and clue status colors"
+```
 
 ---
 

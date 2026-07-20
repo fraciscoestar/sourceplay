@@ -1,57 +1,29 @@
-# Task 3 Report: Word Dictionary and Random Generator (RNG)
+# Task 3 Report: Normal Mode Tile Selection & Out-of-Order Gap Filling
 
-## What Was Implemented
-- **Mulberry32 PRNG and Seed Utilities** (`packages/wordle/src/rng.ts`):
-  - `mulberry32`: A 32-bit seedable pseudo-random number generator.
-  - `hashSeed`: Generates a numeric seed hash from any string value (FNV-1a 32-bit style).
-  - `randomSeed`: Generates a random seed using high entropy (combining timestamp and `Math.random`).
-  - `parseSeed`: Normalizes integer string input or hashes text inputs to construct a numeric seed.
-- **Spanish Word Loading, Normalization, and Seed Selection** (`packages/wordle/src/words.ts`):
-  - `removeAccents`: Helper to map accented vowels and umlauts back to their base counterparts.
-  - Curated accented list (`ACCENTED_CURATED`) and unaccented list (`UNACCENTED_CURATED`) of Spanish words (lengths 4-10) for game choices.
-  - Quick-validation dictionary (`VALIDATION_SET` loaded from `SPANISH_WORDS` in the `wordsearch` package, filtered to lengths 4 to 10 and combined with the curated lists).
-  - `isValidWord`: Validates uppercase, normalized versions of typed words against the verification set.
-  - `getSeededWord`: Retrieves a word using a given PRNG generator instance; respects `tildesMode` by returning either accented curated terms or normalized unaccented versions.
+## Summary of Changes
 
-## What Was Tested and Test Results
-- Created a temporary test runner (`packages/wordle/src/test-run.ts`) to verify both modules:
-  - Ensured seed hashing parses numeric string seeds correctly versus arbitrary word seeds.
-  - Checked generator output consistency for a specific seed.
-  - Validated that `removeAccents` strips characters like `Á` and `ü`.
-  - Checked that `isValidWord` correctly validates common words (like `CASA`, `CAFÉ`, `CAFE` irrespective of accents) and rejects short or invalid terms.
-  - Checked `getSeededWord` returns valid uppercase strings corresponding to the expected mode (`tildesMode` true or false).
-  - Cleaned up the temporary runner prior to git stage.
-- Ran TypeScript compilation: `npx tsc --noEmit -p packages/wordle/tsconfig.json` compiles successfully with no errors.
+1. **CSS Focus Highlight (`packages/wordle/src/style.css`)**:
+   - Added `.tile.selected` rule with blue outline (`#2196f3`), box shadow glow, and slight scale transform (`scale(1.03)`).
 
-## Files Changed
-- `packages/wordle/src/rng.ts` (New file)
-- `packages/wordle/src/words.ts` (New file)
+2. **Tile Selection & Out-of-Order Gap Filling (`packages/wordle/src/main.ts`)**:
+   - Introduced `selectedIndex` state to track active focused tile.
+   - Rendered active row tiles with click event listeners, setting `selectedIndex` and re-focusing `hiddenInput`.
+   - Applied `.tile.selected` CSS class to the active tile.
+   - Refactored character input (`insertCharacter`) to handle out-of-order gap filling in normal mode:
+     - Allows setting characters at any tile slot via `selectedIndex`.
+     - Automatically advances `selectedIndex` to the next empty tile slot.
+     - Preserves existing letters while filling gaps.
+   - Implemented `handleBackspace` to clear current tile if filled, or step backward and clear the preceding tile if current tile is empty.
+   - Added keyboard left/right arrow key navigation (`ArrowLeft` / `ArrowRight`) to jump between active row tiles.
+   - Integrated input handlers for physical keyboard, virtual keyboard, and hidden mobile input.
+   - Reset `selectedIndex` to 0 on new game, next word, or guess submission.
 
-## Self-Review Findings
-- All functions matching the required API signatures are correctly implemented, exported, and function as described in the requirements.
-- Integration between the existing `wordsearch` vocabulary and the new `wordle` verification dictionary was verified.
+## Verification
 
-## Issues or Concerns
-- None.
+- **TypeScript Compilation**:
+  - Ran `npx tsc --noEmit -p packages/wordle/tsconfig.json`.
+  - Output: 0 errors (Exit code 0).
 
-## Review Findings Fixes
+## Commit
 
-The following fixes have been applied to resolve the review findings:
-
-1. **Critical: 3-Letter Word Inclusion**:
-   - Removed all 3-letter words (`"ASÍ"`, `"MÁS"`, `"RÍO"`, `"DÍA"`, `"VÍA"`) from the `ACCENTED_CURATED` array in `packages/wordle/src/words.ts`.
-
-2. **Critical: Lack of Length Verification for Curated Words**:
-   - Added module-level filtered arrays `VALID_ACCENTED_CURATED` and `VALID_UNACCENTED_CURATED` to ensure that only curated words of length `>= 4` and `<= 10` are utilized.
-   - Updated `VALIDATION_SET` to populates from `VALID_ACCENTED_CURATED` and `VALID_UNACCENTED_CURATED`, ensuring only words of valid lengths are added to the validation set.
-   - Updated `getSeededWord` to select from `VALID_ACCENTED_CURATED` and `VALID_UNACCENTED_CURATED`, ensuring that any selected secret word is strictly between 4 and 10 characters in length.
-
-## Verification of Fixes
-
-1. **TypeScript Compilation**:
-   - Ran `npx tsc --noEmit -p packages/wordle/tsconfig.json` to verify the codebase compiles successfully without errors.
-   - Output:
-     ```
-     npx tsc --noEmit -p packages/wordle/tsconfig.json
-     (Exit code 0, no output - Clean Compilation)
-     ```
+- `5140956 feat(wordle): add tile selection and out-of-order gap filling in normal mode`

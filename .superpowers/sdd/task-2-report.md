@@ -1,19 +1,21 @@
-# Task 2 Report: Create HTML Structure
+# Task 2 Report: On-Screen Virtual Keyboard UI & Accents Row
 
-## What was implemented
-- Created the core game HTML structure in `packages/wordle/index.html`.
-- Included start menu and play area views.
-- Included input elements for custom seeds, settings checkboxes (Tildes, Hidden Length/Letroso, Time Trial), and a hidden input for mobile virtual keyboard activation.
-- Included UI components for seed/score indicators, board attempts container, controls (skip, reveal, restart, exit), and game overlays.
-- Configured light/dark theme initialization matching `@sourceplay/shared` and dynamic query param check.
+## Summary
+Successfully implemented Task 2: On-Screen Virtual Keyboard UI & Accents Row for the Wordle game package (`packages/wordle`).
 
-## Files changed
-- `packages/wordle/index.html` (created)
+## Changes Made
+- **`packages/wordle/index.html`**: Added `#keyboard.keyboard-container` element below `#board`.
+- **`packages/wordle/src/style.css`**: Added styling for `.keyboard-container`, `.keyboard-row`, `.key`, `.key.key-wide`, `.key:active`, and clue states `.key.correct`, `.key.present`, `.key.absent`.
+- **`packages/wordle/src/main.ts`**:
+  - Initialized `keyboardEl` and `keyStatuses` Map.
+  - Added `renderKeyboard()` function to render QWERTY layout + optional `Á É Í Ó Ú` 4th row when `tildesMode` is enabled.
+  - Added `updateKeyboardColors()` function to compute green/yellow/gray statuses per key based on past guesses.
+  - Added `handleVirtualKeyPress()` event handler supporting letter key presses, Backspace (`⌫`), and Enter (`ENTER`).
+  - Updated `loadNextWord()` and `submitGuess()` to trigger key status updates and re-renders cleanly.
 
-## Self-review findings
-- Checked that the HTML uses semantic elements.
-- Validated correct linkage to stylesheet `/src/style.css` and typescript entrypoint `/src/main.ts`.
-- Validated that ID names correspond exactly to the requirements of the task brief.
+## Verification
+- Ran TypeScript type check: `npx tsc --noEmit -p packages/wordle/tsconfig.json` -> 0 errors (PASS).
+- Verified git status and committed changes.
 
-## Issues or concerns
-- None.
+## Commit
+- `eadf76a` `feat(wordle): add on-screen QWERTY virtual keyboard with tildes row and clue status colors`

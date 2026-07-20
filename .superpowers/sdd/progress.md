@@ -1,10 +1,7 @@
-# Progress Ledger: Palabra del Día
+# Progress Ledger: Palabra del Día v2
 
-- [x] Task 1: Scaffolding `@sourceplay/wordle` package
-- [x] Task 2: Create HTML Structure
-- [x] Task 3: Word Dictionary and Random Generator (RNG)
-- [x] Task 4: Styling and Themes (CSS)
-- [x] Task 5: Core Typing Logic & Hidden Input Integration
-- [x] Task 6: Grid Rendering & Accent/Letroso Comparison Algorithm
-- [x] Task 7: Game Lifecycle, Time Trial, and Stopwatch Timer
-- [x] Task 8: App Registration & Build Script Modifications
+- [x] Task 1: Full RAE Dictionary Data & Hybrid Word Pool
+- [x] Task 2: On-Screen Virtual Keyboard UI & Accents Row
+- [x] Task 3: Normal Mode Tile Selection & Out-of-Order Gap Filling
+- [x] Task 4: Letroso Mode Starting State & Tile Selection / Editing
+- [x] Task 5: Tile Animation Overflow Fixes & Full Monorepo Assembly Check

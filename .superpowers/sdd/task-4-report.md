@@ -1,26 +1,34 @@
-# Task 4 Report: Styling and Themes (CSS)
+# Task 4 Report: Letroso Mode Starting State & Tile Selection / Editing
 
-## What Was Implemented
+## Summary of Implementation
 
-1. **Wordle-specific Stylesheet (`packages/wordle/src/style.css`):**
-   - Import reference to `@sourceplay/shared/style.css` to consume shared paper variables.
-   - Page layouts matching the paper texture background, custom transitions, font typography, and dimensions.
-   - Custom board styling (`.board-wrap`) and attempts container layout scroll containment styles.
-   - Interactive visual feedback: `.tile.pop` styling for keystrokes.
-   - Clear contrast correct/present/absent colors utilizing custom theme colors.
-   - Letroso specialty rounded borders for start and end tiles: `.tile.is-initial` and `.tile.is-final`.
-   - Control buttons styling, mobile-friendly checkbox configurations, custom user seed container styles, toast alerts, overlays, modals, and helper layout utility classes.
+1. **Zero-Tile Initial Active Row Rendering (`packages/wordle/src/main.ts`)**:
+   - Refactored `renderBoard()` in Letroso mode (`hiddenLengthMode = true`) to render only the tiles present in `currentGuess`.
+   - When `currentGuess` is empty (`""`), 0 tiles are rendered for the active row (no initial placeholder boxes).
 
-## Files Changed
+2. **Tile Selection & Targeted Editing**:
+   - Clicking any existing tile in the active row updates `selectedIndex` to target that tile for replacement.
+   - Typing when `selectedIndex` points to an existing tile replaces the character at `selectedIndex`.
+   - Typing when focused after the last tile (`selectedIndex >= chars.length`) appends a new tile (up to max 10 characters).
 
-- **Created:**
-   - [packages/wordle/src/style.css](file:///c:/Users/Fraci/Desktop/typescript%20projects/sourceplay/packages/wordle/src/style.css)
+3. **Backspace Handling in Letroso Mode**:
+   - `handleBackspace()` removes/splices the letter at `selectedIndex` if an existing tile is selected.
+   - Adjusts `selectedIndex` gracefully when splicing the last tile or when deleting from the end of the word.
+   - Safely returns without action when `currentGuess` is already empty (`""`).
 
-## Self-Review Findings
+4. **Keyboard Arrow Navigation**:
+   - Supports `ArrowLeft` and `ArrowRight` navigation in Letroso mode across active tiles and focus-after-end position (`0..currentGuess.length`).
 
-- **Completeness:** The stylesheet defines every single selector needed for the Wordle game as described in the brief.
-- **Theme Variables:** It correctly consumes all variables from `@sourceplay/shared/style.css`.
-- **Aesthetic Consistency:** Preserves the paper design system layout.
+5. **Short Word & Dictionary Toast Validation**:
+   - Evaluates `isTooShort(cleanGuess)` (< 4 letters) and displays toast `"Palabra demasiado corta (mínimo 4 letras)"`.
+   - Evaluates `!isValidWord(currentGuess)` and displays toast `"Palabra no encontrada en el diccionario"`.
 
-## Issues/Concerns
-- None.
+## Verification
+
+- **TypeScript Compilation**:
+  - Command: `npx tsc --noEmit -p packages/wordle/tsconfig.json`
+  - Result: Exit code 0, 0 errors.
+
+## Commit
+
+- `114fdae feat(wordle): add Letroso zero-tile initial start, tile editing, and short word toast validation`
