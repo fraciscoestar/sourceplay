@@ -42,11 +42,24 @@ for (const w of SPANISH_WORDS) {
     secretPoolSet.add(upper);
   }
 }
-for (const w of RAE_WORDS) {
-  if (secretPoolSet.size >= 20000) break;
-  const upper = w.toUpperCase();
-  if (upper.length >= 4 && upper.length <= 10) {
-    secretPoolSet.add(upper);
+const remainingCount = 20000 - secretPoolSet.size;
+if (remainingCount > 0) {
+  const step = Math.max(1, Math.floor(RAE_WORDS.length / remainingCount));
+  for (let i = 0; i < RAE_WORDS.length && secretPoolSet.size < 20000; i += step) {
+    const w = RAE_WORDS[i];
+    const upper = w.toUpperCase();
+    if (upper.length >= 4 && upper.length <= 10) {
+      secretPoolSet.add(upper);
+    }
+  }
+  if (secretPoolSet.size < 20000) {
+    for (const w of RAE_WORDS) {
+      if (secretPoolSet.size >= 20000) break;
+      const upper = w.toUpperCase();
+      if (upper.length >= 4 && upper.length <= 10) {
+        secretPoolSet.add(upper);
+      }
+    }
   }
 }
 
@@ -64,8 +77,7 @@ export function isTooShort(word: string): boolean {
 }
 
 export function getSeededWord(prng: () => number, tildesMode: boolean): string {
-  const pool = SECRET_POOL.length > 0 ? SECRET_POOL : Array.from(RAW_DICTIONARY_SET);
-  const idx = Math.floor(prng() * pool.length);
-  const word = pool[idx];
+  const idx = Math.floor(prng() * SECRET_POOL.length);
+  const word = SECRET_POOL[idx];
   return tildesMode ? word : removeAccents(word);
 }
