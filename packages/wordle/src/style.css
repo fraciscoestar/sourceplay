@@ -105,8 +105,16 @@ body {
 }
 
 .attempts-container {
-  flex-grow: 1;
+  flex: 1;
+  width: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
   scrollbar-width: none; /* Firefox */
 }
 
@@ -146,9 +154,23 @@ body {
   transition: transform 0.1s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
+@keyframes tilePop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Pop animation when typing */
 .tile.pop {
-  transform: scale(1.1);
+  animation: tilePop 0.15s ease-in-out forwards;
 }
 
 .tile.selected {
