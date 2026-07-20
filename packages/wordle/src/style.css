@@ -508,3 +508,19 @@ body {
   opacity: 0.6;
 }
 
+#revealWordBtn.icon-btn {
+  flex: 0 0 auto;
+  width: 38px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+#revealWordBtn.icon-btn:hover {
+  background: var(--amber-soft);
+}
+
+

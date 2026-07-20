@@ -47,6 +47,7 @@ const keyboardEl = document.getElementById('keyboard') as HTMLDivElement;
 
 const keyStatuses = new Map<string, 'correct' | 'present' | 'absent'>();
 
+const submitGuessBtn = document.getElementById('submitGuessBtn') as HTMLButtonElement;
 const skipWordBtn = document.getElementById('skipWordBtn') as HTMLButtonElement;
 const revealWordBtn = document.getElementById('revealWordBtn') as HTMLButtonElement;
 const restartGameBtn = document.getElementById('restartGameBtn') as HTMLButtonElement;
@@ -64,6 +65,10 @@ const modalDesc = document.getElementById('modalDesc') as HTMLElement;
 const modalNextBtn = document.getElementById('modalNextBtn') as HTMLButtonElement;
 const modalReplayBtn = document.getElementById('modalReplayBtn') as HTMLButtonElement;
 const modalHomeBtn = document.getElementById('modalHomeBtn') as HTMLButtonElement;
+
+const surrenderModal = document.getElementById('surrenderModal') as HTMLDivElement;
+const surrenderCancelBtn = document.getElementById('surrenderCancelBtn') as HTMLButtonElement;
+const surrenderConfirmBtn = document.getElementById('surrenderConfirmBtn') as HTMLButtonElement;
 
 let toastTimeout: number | null = null;
 function showToast(msg: string): void {
@@ -268,6 +273,7 @@ function startNewGame(fromMenu: boolean = false): void {
   startMenu.classList.add('hidden');
   gameArea.classList.remove('hidden');
   endGameOverlay.classList.remove('show');
+  if (surrenderModal) surrenderModal.classList.remove('show');
   
   // Load first word
   loadNextWord();
@@ -303,7 +309,7 @@ function renderKeyboard(): void {
   const rows = [
     ['Q','W','E','R','T','Y','U','I','O','P'],
     ['A','S','D','F','G','H','J','K','L','Ñ'],
-    ['ENTER','Z','X','C','V','B','N','M','⌫']
+    ['Z','X','C','V','B','N','M','⌫']
   ];
   if (tildesMode) {
     rows.push(['Á','É','Í','Ó','Ú']);
@@ -653,19 +659,31 @@ function handleWin(): void {
 
 // Setup main view buttons
 startGameBtn.addEventListener('click', startGame);
+submitGuessBtn.addEventListener('click', submitGuess);
 skipWordBtn.addEventListener('click', handleSkipWord);
-revealWordBtn.addEventListener('click', handleRevealWord);
+revealWordBtn.addEventListener('click', () => {
+  if (!isGameOver) surrenderModal.classList.add('show');
+});
+surrenderCancelBtn.addEventListener('click', () => {
+  surrenderModal.classList.remove('show');
+});
+surrenderConfirmBtn.addEventListener('click', () => {
+  surrenderModal.classList.remove('show');
+  handleRevealWord();
+});
 restartGameBtn.addEventListener('click', () => startNewGame(false));
 
 exitToMenuBtn.addEventListener('click', () => {
   stopTimer();
   isGameOver = true;
+  if (surrenderModal) surrenderModal.classList.remove('show');
   gameArea.classList.add('hidden');
   startMenu.classList.remove('hidden');
 });
 
 modalHomeBtn.addEventListener('click', () => {
   endGameOverlay.classList.remove('show');
+  if (surrenderModal) surrenderModal.classList.remove('show');
   isGameOver = true;
   gameArea.classList.add('hidden');
   startMenu.classList.remove('hidden');
