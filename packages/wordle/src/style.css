@@ -1,5 +1,18 @@
 @import "@sourceplay/shared/style.css";
 
+:root {
+  --paper-bg-light: #f4efe6;
+  --paper-bg-dark: #2c2c2c;
+  --paper-text: var(--ink, #211f1a);
+  --paper-border: var(--line, #d1c7bd);
+}
+
+[data-theme="dark"],
+.dark-theme {
+  --paper-text: var(--ink, #ece7d6);
+  --paper-border: #444444;
+}
+
 html, body {
   overflow: hidden;
   height: 100%;
@@ -442,13 +455,20 @@ body {
   max-width: 44px;
   border-radius: 6px;
   border: 1px solid var(--paper-border, #d1c7bd);
-  background: var(--paper-bg-card, #f4efe6);
-  color: var(--ink-main, #2c2523);
+  background: var(--paper-bg-light, #f4efe6);
+  color: var(--paper-text, #2c2523);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+[data-theme="dark"] .key,
+.dark-theme .key {
+  background: var(--paper-bg-dark, #2c2c2c);
+  color: var(--paper-text, #ece7d6);
+  border-color: var(--paper-border, #444444);
 }
 
 .key.key-wide {
@@ -476,6 +496,15 @@ body {
 .key.absent {
   background: #757575 !important;
   color: #e0e0e0 !important;
+  border-color: #757575 !important;
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .key.absent,
+.dark-theme .key.absent {
+  background: #424242 !important;
+  color: #a0a0a0 !important;
+  border-color: #424242 !important;
   opacity: 0.6;
 }
 
