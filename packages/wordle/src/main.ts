@@ -3,6 +3,8 @@ import { mulberry32, parseSeed, randomSeed } from './rng';
 import { getSeededWord, isTooShort, isValidWord, removeAccents } from './words';
 
 // State
+let customSeed: number = 0;
+let gameCount: number = 0;
 let seedNum: number = 0;
 let prng: () => number = () => 0;
 let secretWord: string = '';
@@ -217,14 +219,22 @@ function setupInputHandlers(): void {
 }
 
 // Game Lifecycle & Timers
-function startGame(): void {
+function startNewGame(fromMenu: boolean = false): void {
   // Read config
   tildesMode = menuTildesCheck.checked;
   hiddenLengthMode = menuHiddenLengthCheck.checked;
   timeTrialMode = menuTimeTrialCheck.checked;
   
-  const rawSeed = menuSeedInput.value.trim() || String(randomSeed());
-  seedNum = parseSeed(rawSeed);
+  if (fromMenu) {
+    const rawSeed = menuSeedInput.value.trim() || String(randomSeed());
+    customSeed = parseSeed(rawSeed);
+    gameCount = 0;
+    seedLabel.textContent = '#' + rawSeed;
+  } else {
+    gameCount++;
+  }
+
+  seedNum = (customSeed + gameCount) >>> 0;
   prng = mulberry32(seedNum);
   
   guesses = [];
@@ -236,7 +246,6 @@ function startGame(): void {
   timeTrialRemaining = 300;
   
   // UI setup
-  seedLabel.textContent = '#' + rawSeed;
   scoreCount.textContent = '0';
   if (timeTrialMode) {
     scoreLabel.classList.remove('hidden');
@@ -268,6 +277,10 @@ function startGame(): void {
   
   // Set focus
   setTimeout(() => hiddenInput.focus(), 50);
+}
+
+function startGame(): void {
+  startNewGame(true);
 }
 
 function handleVirtualKeyPress(k: string): void {
@@ -642,7 +655,7 @@ function handleWin(): void {
 startGameBtn.addEventListener('click', startGame);
 skipWordBtn.addEventListener('click', handleSkipWord);
 revealWordBtn.addEventListener('click', handleRevealWord);
-restartGameBtn.addEventListener('click', startGame);
+restartGameBtn.addEventListener('click', () => startNewGame(false));
 
 exitToMenuBtn.addEventListener('click', () => {
   stopTimer();
@@ -660,7 +673,7 @@ modalHomeBtn.addEventListener('click', () => {
 
 modalReplayBtn.addEventListener('click', () => {
   endGameOverlay.classList.remove('show');
-  startGame();
+  startNewGame(false);
 });
 
 // Initialize selector headers
