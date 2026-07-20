@@ -384,3 +384,70 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* Virtual Keyboard Styles */
+.keyboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 500px;
+  margin: 12px auto 0 auto;
+  padding: 0 8px;
+  user-select: none;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.key {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  height: 48px;
+  flex: 1;
+  min-width: 28px;
+  max-width: 44px;
+  border-radius: 6px;
+  border: 1px solid var(--paper-border, #d1c7bd);
+  background: var(--paper-bg-card, #f4efe6);
+  color: var(--ink-main, #2c2523);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.key.key-wide {
+  max-width: 64px;
+  flex: 1.5;
+  font-size: 0.8rem;
+}
+
+.key:active {
+  transform: scale(0.95);
+}
+
+.key.correct {
+  background: #2e7d32 !important;
+  color: #ffffff !important;
+  border-color: #1b5e20 !important;
+}
+
+.key.present {
+  background: #f57f17 !important;
+  color: #ffffff !important;
+  border-color: #f57f17 !important;
+}
+
+.key.absent {
+  background: #757575 !important;
+  color: #e0e0e0 !important;
+  opacity: 0.6;
+}
+

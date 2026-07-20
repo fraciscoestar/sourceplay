@@ -40,6 +40,9 @@ const gameModeTags = document.getElementById('gameModeTags') as HTMLDivElement;
 const board = document.getElementById('board') as HTMLDivElement;
 const attemptsContainer = document.getElementById('attemptsContainer') as HTMLDivElement;
 const hiddenInput = document.getElementById('hiddenInput') as HTMLInputElement;
+const keyboardEl = document.getElementById('keyboard') as HTMLDivElement;
+
+const keyStatuses = new Map<string, 'correct' | 'present' | 'absent'>();
 
 const skipWordBtn = document.getElementById('skipWordBtn') as HTMLButtonElement;
 const revealWordBtn = document.getElementById('revealWordBtn') as HTMLButtonElement;
@@ -202,6 +205,82 @@ function startGame(): void {
   setTimeout(() => hiddenInput.focus(), 50);
 }
 
+function handleVirtualKeyPress(k: string): void {
+  if (isGameOver) return;
+  if (k === 'ENTER') {
+    submitGuess();
+  } else if (k === '⌫') {
+    if (currentGuess.length > 0) {
+      currentGuess = currentGuess.slice(0, -1);
+      renderBoard();
+    }
+  } else {
+    const filtered = filterInput(k);
+    if (filtered) {
+      const maxLen = hiddenLengthMode ? 10 : secretWord.length;
+      if (currentGuess.length < maxLen) {
+        currentGuess += filtered;
+        renderBoard();
+      }
+    }
+  }
+}
+
+function renderKeyboard(): void {
+  if (!keyboardEl) return;
+  keyboardEl.innerHTML = '';
+  const rows = [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L','Ñ'],
+    ['ENTER','Z','X','C','V','B','N','M','⌫']
+  ];
+  if (tildesMode) {
+    rows.push(['Á','É','Í','Ó','Ú']);
+  }
+
+  rows.forEach(row => {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'keyboard-row';
+    row.forEach(k => {
+      const btn = document.createElement('button');
+      btn.className = 'key';
+      if (k === 'ENTER' || k === '⌫') {
+        btn.classList.add('key-wide');
+      }
+      btn.textContent = k;
+      const status = keyStatuses.get(k);
+      if (status) {
+        btn.classList.add(status);
+      }
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleVirtualKeyPress(k);
+      });
+      rowDiv.appendChild(btn);
+    });
+    keyboardEl.appendChild(rowDiv);
+  });
+}
+
+function updateKeyboardColors(): void {
+  guesses.forEach(g => {
+    const colors = evaluateGuessColors(g);
+    for (let i = 0; i < g.length; i++) {
+      const char = g[i];
+      const col = colors[i];
+      const prev = keyStatuses.get(char);
+      if (col === 'correct') {
+        keyStatuses.set(char, 'correct');
+      } else if (col === 'present' && prev !== 'correct') {
+        keyStatuses.set(char, 'present');
+      } else if (col === 'absent' && !prev) {
+        keyStatuses.set(char, 'absent');
+      }
+    }
+  });
+  renderKeyboard();
+}
+
 function loadNextWord(): void {
   if (isGameOver) return;
   secretWord = getSeededWord(prng, tildesMode);
@@ -209,7 +288,9 @@ function loadNextWord(): void {
   currentGuess = '';
   isGameOver = false;
   wordStartTime = Date.now(); // track start time of this word
+  keyStatuses.clear();
   renderBoard();
+  renderKeyboard();
 }
 
 function startTimer(): void {
@@ -422,6 +503,7 @@ function submitGuess(): void {
   currentGuess = '';
   
   renderBoard();
+  updateKeyboardColors();
 
   // Check Win
   if (lastGuess === secretWord) {
