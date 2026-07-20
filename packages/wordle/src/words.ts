@@ -11,25 +11,40 @@ export function removeAccents(str: string): string {
   return str.replace(/[ÁÉÍÓÚáéíóúÜü]/g, (m) => map[m] || m);
 }
 
-// Full RAE Dictionary words + SPANISH_WORDS dataset for validation
+// Generate dynamic Spanish inflections (+S for vowels, +ES for consonants, Z->CES)
+export function getInflections(word: string): string[] {
+  const upper = word.toUpperCase();
+  const results: string[] = [upper];
+  if (upper.endsWith('Z')) {
+    results.push(upper.slice(0, -1) + 'CES');
+  } else if (/[AEIOUÁÉÍÓÚÜ]$/.test(upper)) {
+    results.push(upper + 'S');
+  } else {
+    results.push(upper + 'ES');
+  }
+  return results;
+}
+
+// Full RAE Dictionary words + SPANISH_WORDS dataset for validation with inflections
 export const RAW_DICTIONARY_SET = new Set<string>();
 
-// Populate RAW_DICTIONARY_SET with uppercase and normalized entries
-SPANISH_WORDS.forEach((w) => {
+function processWord(w: string) {
   const upper = w.toUpperCase();
-  if (upper.length >= 4 && upper.length <= 10) {
-    RAW_DICTIONARY_SET.add(upper);
-    RAW_DICTIONARY_SET.add(removeAccents(upper));
-  }
-});
+  const normalized = removeAccents(upper);
 
-RAE_WORDS.forEach((w) => {
-  const upper = w.toUpperCase();
-  if (upper.length >= 4 && upper.length <= 10) {
-    RAW_DICTIONARY_SET.add(upper);
-    RAW_DICTIONARY_SET.add(removeAccents(upper));
+  for (const entry of [upper, normalized]) {
+    const inflections = getInflections(entry);
+    for (const item of inflections) {
+      if (item.length >= 4 && item.length <= 10) {
+        RAW_DICTIONARY_SET.add(item);
+        RAW_DICTIONARY_SET.add(removeAccents(item));
+      }
+    }
   }
-});
+}
+
+SPANISH_WORDS.forEach(processWord);
+RAE_WORDS.forEach(processWord);
 
 // Alias for validation set
 export const VALIDATION_SET = RAW_DICTIONARY_SET;

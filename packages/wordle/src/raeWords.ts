@@ -1,4 +1,4 @@
-// Full 57,018 RAE Spanish Dictionary Word List
+// Full 57,018 RAE Spanish Dictionary Word List dataset for Wordle validation
 export const RAE_WORDS: string[] = [
   "ABAÁ",
   "ABABOL",
