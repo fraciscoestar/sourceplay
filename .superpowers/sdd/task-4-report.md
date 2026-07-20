@@ -1,34 +1,24 @@
-# Task 4 Report: Letroso Mode Starting State & Tile Selection / Editing
+# Task 4 Report: Submit Button Relocation, Surrender Flag Icon Button, & Surrender Modal
 
-## Summary of Implementation
+## Status
+DONE
 
-1. **Zero-Tile Initial Active Row Rendering (`packages/wordle/src/main.ts`)**:
-   - Refactored `renderBoard()` in Letroso mode (`hiddenLengthMode = true`) to render only the tiles present in `currentGuess`.
-   - When `currentGuess` is empty (`""`), 0 tiles are rendered for the active row (no initial placeholder boxes).
-
-2. **Tile Selection & Targeted Editing**:
-   - Clicking any existing tile in the active row updates `selectedIndex` to target that tile for replacement.
-   - Typing when `selectedIndex` points to an existing tile replaces the character at `selectedIndex`.
-   - Typing when focused after the last tile (`selectedIndex >= chars.length`) appends a new tile (up to max 10 characters).
-
-3. **Backspace Handling in Letroso Mode**:
-   - `handleBackspace()` removes/splices the letter at `selectedIndex` if an existing tile is selected.
-   - Adjusts `selectedIndex` gracefully when splicing the last tile or when deleting from the end of the word.
-   - Safely returns without action when `currentGuess` is already empty (`""`).
-
-4. **Keyboard Arrow Navigation**:
-   - Supports `ArrowLeft` and `ArrowRight` navigation in Letroso mode across active tiles and focus-after-end position (`0..currentGuess.length`).
-
-5. **Short Word & Dictionary Toast Validation**:
-   - Evaluates `isTooShort(cleanGuess)` (< 4 letters) and displays toast `"Palabra demasiado corta (mínimo 4 letras)"`.
-   - Evaluates `!isValidWord(currentGuess)` and displays toast `"Palabra no encontrada en el diccionario"`.
+## Summary of Changes
+1. **Virtual Keyboard Layout (`packages/wordle/src/main.ts`)**:
+   - Removed `'ENTER'` key from Row 3 of the virtual keyboard array in `renderKeyboard()`.
+2. **HTML Structure (`packages/wordle/index.html`)**:
+   - Relocated `#submitGuessBtn` ("Enviar") to `gameplayButtonsRow`.
+   - Rendered small outline `#revealWordBtn` with Lucide flag SVG icon and `title="Rendirse / Revelar palabra"`.
+   - Added `#surrenderModal` confirmation overlay HTML with Cancelar/Confirmar options.
+3. **CSS Styling (`packages/wordle/src/style.css`)**:
+   - Styled `#revealWordBtn.icon-btn` as a warning/amber icon-only button with hover feedback.
+4. **Surrender Modal Handler (`packages/wordle/src/main.ts`)**:
+   - Bound `#submitGuessBtn` to `submitGuess()`.
+   - Bound `#revealWordBtn` to show `#surrenderModal`.
+   - Bound `#surrenderCancelBtn` and `#surrenderConfirmBtn` to hide modal and invoke `handleRevealWord()`.
 
 ## Verification
+- Ran `npm run build:all` and `npm run build --workspace=@sourceplay/wordle` successfully with zero TypeScript or build errors.
 
-- **TypeScript Compilation**:
-  - Command: `npx tsc --noEmit -p packages/wordle/tsconfig.json`
-  - Result: Exit code 0, 0 errors.
-
-## Commit
-
-- `114fdae feat(wordle): add Letroso zero-tile initial start, tile editing, and short word toast validation`
+## Commits Created
+- `59db939` feat(wordle): relocate Enviar button, add surrender flag button and confirmation modal

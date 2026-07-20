@@ -1,7 +1,6 @@
-# Progress Ledger: Palabra del Día v2
+# Progress Ledger: Palabra del Día v2.1 Fixes & UX
 
-- [x] Task 1: Full RAE Dictionary Data & Hybrid Word Pool
-- [x] Task 2: On-Screen Virtual Keyboard UI & Accents Row
-- [x] Task 3: Normal Mode Tile Selection & Out-of-Order Gap Filling
-- [x] Task 4: Letroso Mode Starting State & Tile Selection / Editing
-- [x] Task 5: Tile Animation Overflow Fixes & Full Monorepo Assembly Check
+- [x] Task 1: Expanded Spanish Lexicon & Inflection Engine
+- [x] Task 2: On-Screen Virtual Keyboard Dark Theme Styling
+- [x] Task 3: PRNG Seed Progression on New Game
+- [x] Task 4: Submit Button Relocation, Surrender Flag Icon Button, & Surrender Modal

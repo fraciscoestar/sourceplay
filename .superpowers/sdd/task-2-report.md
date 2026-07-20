@@ -1,21 +1,24 @@
-# Task 2 Report: On-Screen Virtual Keyboard UI & Accents Row
+# Task 2 Report: On-Screen Virtual Keyboard Dark Theme Styling
 
-## Summary
-Successfully implemented Task 2: On-Screen Virtual Keyboard UI & Accents Row for the Wordle game package (`packages/wordle`).
+**Status:** DONE
+**Commit:** `444d150` - `fix(wordle): support dark mode styling for on-screen virtual keyboard`
+**Report File:** `c:\Users\Fraci\Desktop\typescript projects\sourceplay\.superpowers\sdd\task-2-report.md`
 
-## Changes Made
-- **`packages/wordle/index.html`**: Added `#keyboard.keyboard-container` element below `#board`.
-- **`packages/wordle/src/style.css`**: Added styling for `.keyboard-container`, `.keyboard-row`, `.key`, `.key.key-wide`, `.key:active`, and clue states `.key.correct`, `.key.present`, `.key.absent`.
-- **`packages/wordle/src/main.ts`**:
-  - Initialized `keyboardEl` and `keyStatuses` Map.
-  - Added `renderKeyboard()` function to render QWERTY layout + optional `Á É Í Ó Ú` 4th row when `tildesMode` is enabled.
-  - Added `updateKeyboardColors()` function to compute green/yellow/gray statuses per key based on past guesses.
-  - Added `handleVirtualKeyPress()` event handler supporting letter key presses, Backspace (`⌫`), and Enter (`ENTER`).
-  - Updated `loadNextWord()` and `submitGuess()` to trigger key status updates and re-renders cleanly.
+## Summary of Work Done
 
-## Verification
-- Ran TypeScript type check: `npx tsc --noEmit -p packages/wordle/tsconfig.json` -> 0 errors (PASS).
-- Verified git status and committed changes.
+1. **Theme Variables Added**:
+   - Added `--paper-bg-light`, `--paper-bg-dark`, `--paper-text`, and `--paper-border` variables to `:root` and `[data-theme="dark"], .dark-theme` blocks in `packages/wordle/src/style.css`.
 
-## Commit
-- `eadf76a` `feat(wordle): add on-screen QWERTY virtual keyboard with tildes row and clue status colors`
+2. **Dark Theme Keyboard Rules**:
+   - Styled `.key` under `[data-theme="dark"]` and `.dark-theme` to use dark background `#2c2c2c` (via `--paper-bg-dark`) with light text `#ece7d6` (via `--paper-text`).
+   - Styled `.key.absent` under `[data-theme="dark"]` and `.dark-theme` to use `#424242` background, `#a0a0a0` text color, `#424242` border, and `0.6` opacity.
+   - Retained vibrant `.key.correct` (green `#2e7d32`) and `.key.present` (amber `#f57f17`) contrast in both light and dark themes.
+
+3. **Verification**:
+   - TypeScript compilation (`npx tsc --noEmit -p packages/wordle/tsconfig.json`) passed with 0 errors.
+
+## Test Summary
+- `npx tsc --noEmit -p packages/wordle/tsconfig.json`: PASS (0 errors)
+
+## Concerns
+None.
