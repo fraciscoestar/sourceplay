@@ -97,18 +97,19 @@ function filterInput(char: string): string | null {
 
 function insertCharacter(char: string): void {
   if (isGameOver) return;
-  const maxLen = hiddenLengthMode ? 10 : secretWord.length;
-  let chars = currentGuess.split('');
-  
+
   if (hiddenLengthMode) {
+    let chars = currentGuess.split('');
     if (selectedIndex < chars.length) {
       chars[selectedIndex] = char;
-      selectedIndex = Math.min(selectedIndex + 1, maxLen);
-    } else if (chars.length < maxLen) {
+    } else if (chars.length < 10) {
       chars.push(char);
       selectedIndex = chars.length;
     }
+    currentGuess = chars.join('');
   } else {
+    const maxLen = secretWord.length;
+    let chars = currentGuess.split('');
     while (chars.length < maxLen) chars.push(' ');
     chars[selectedIndex] = char;
     // Advance selectedIndex to next empty tile
@@ -118,30 +119,29 @@ function insertCharacter(char: string): void {
     } else if (selectedIndex < maxLen - 1) {
       selectedIndex++;
     }
+    currentGuess = chars.join('').trimEnd();
   }
-  currentGuess = chars.join('').trimEnd();
   renderBoard();
 }
 
 function handleBackspace(): void {
   if (isGameOver) return;
-  let chars = currentGuess.split('');
+  
   if (hiddenLengthMode) {
+    if (currentGuess.length === 0) return;
+    let chars = currentGuess.split('');
     if (selectedIndex < chars.length) {
-      if (chars[selectedIndex] && chars[selectedIndex] !== ' ') {
-        chars.splice(selectedIndex, 1);
-      } else if (selectedIndex > 0) {
-        selectedIndex--;
-        chars.splice(selectedIndex, 1);
+      chars.splice(selectedIndex, 1);
+      if (selectedIndex > 0 && selectedIndex >= chars.length) {
+        selectedIndex = chars.length - 1;
       }
-      if (selectedIndex > chars.length) {
-        selectedIndex = chars.length;
-      }
-    } else if (chars.length > 0) {
+    } else {
       chars.pop();
-      selectedIndex = chars.length;
+      selectedIndex = Math.max(0, chars.length);
     }
+    currentGuess = chars.join('');
   } else {
+    let chars = currentGuess.split('');
     const maxLen = secretWord.length;
     while (chars.length < maxLen) chars.push(' ');
     
@@ -151,8 +151,8 @@ function handleBackspace(): void {
       selectedIndex--;
       chars[selectedIndex] = ' ';
     }
+    currentGuess = chars.join('').trimEnd();
   }
-  currentGuess = chars.join('').trimEnd();
   renderBoard();
 }
 
@@ -191,14 +191,14 @@ function setupInputHandlers(): void {
       submitGuess();
       e.preventDefault();
     } else if (e.key === 'ArrowLeft') {
-      if (!hiddenLengthMode && selectedIndex > 0) {
+      if (selectedIndex > 0) {
         selectedIndex--;
         renderBoard();
       }
       e.preventDefault();
     } else if (e.key === 'ArrowRight') {
-      const maxLen = hiddenLengthMode ? 10 : secretWord.length;
-      if (!hiddenLengthMode && selectedIndex < maxLen - 1) {
+      const maxLen = hiddenLengthMode ? currentGuess.length : secretWord.length - 1;
+      if (selectedIndex < maxLen) {
         selectedIndex++;
         renderBoard();
       }
@@ -461,36 +461,63 @@ function renderBoard(): void {
     const activeRow = document.createElement('div');
     activeRow.className = 'row-guess active-row';
     
-    const targetLen = hiddenLengthMode ? Math.max(4, currentGuess.length) : secretWord.length;
-    if (selectedIndex >= targetLen) {
-      selectedIndex = Math.max(0, targetLen - 1);
-    }
-
-    const chars = currentGuess.split('');
-    while (chars.length < targetLen) {
-      chars.push('');
-    }
-    
-    chars.forEach((ch, idx) => {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      if (ch && ch !== ' ') {
-        tile.textContent = ch;
-        tile.classList.add('pop'); // Trigger CSS scaling
-      } else {
-        tile.textContent = '';
+    if (hiddenLengthMode) {
+      if (selectedIndex > currentGuess.length) {
+        selectedIndex = currentGuess.length;
       }
-      if (idx === selectedIndex) {
-        tile.classList.add('selected');
-      }
-      tile.addEventListener('click', () => {
-        if (isGameOver) return;
-        selectedIndex = idx;
-        renderBoard();
-        setTimeout(() => hiddenInput.focus(), 10);
+      const chars = currentGuess.split('');
+      chars.forEach((ch, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        if (ch && ch !== ' ') {
+          tile.textContent = ch;
+          tile.classList.add('pop'); // Trigger CSS scaling
+        }
+        if (idx === selectedIndex) {
+          tile.classList.add('selected');
+        }
+        tile.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (isGameOver) return;
+          selectedIndex = idx;
+          renderBoard();
+          setTimeout(() => hiddenInput.focus(), 10);
+        });
+        activeRow.appendChild(tile);
       });
-      activeRow.appendChild(tile);
-    });
+    } else {
+      const targetLen = secretWord.length;
+      if (selectedIndex >= targetLen) {
+        selectedIndex = Math.max(0, targetLen - 1);
+      }
+
+      const chars = currentGuess.split('');
+      while (chars.length < targetLen) {
+        chars.push('');
+      }
+      
+      chars.forEach((ch, idx) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        if (ch && ch !== ' ') {
+          tile.textContent = ch;
+          tile.classList.add('pop'); // Trigger CSS scaling
+        } else {
+          tile.textContent = '';
+        }
+        if (idx === selectedIndex) {
+          tile.classList.add('selected');
+        }
+        tile.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (isGameOver) return;
+          selectedIndex = idx;
+          renderBoard();
+          setTimeout(() => hiddenInput.focus(), 10);
+        });
+        activeRow.appendChild(tile);
+      });
+    }
     board.appendChild(activeRow);
   }
   
@@ -561,18 +588,17 @@ function submitGuess(): void {
   const cleanGuess = currentGuess.replace(/ /g, '');
 
   if (isTooShort(cleanGuess)) {
-    showToast('La palabra debe tener al menos 4 letras');
+    showToast('Palabra demasiado corta (mínimo 4 letras)');
     return;
   }
   
-  const minLen = hiddenLengthMode ? 4 : secretWord.length;
-  if (currentGuess.length < minLen || (!hiddenLengthMode && (currentGuess.includes(' ') || currentGuess.length < secretWord.length))) {
-    showToast(`La palabra debe tener al menos ${minLen} letras`);
+  if (!hiddenLengthMode && (currentGuess.includes(' ') || currentGuess.length < secretWord.length)) {
+    showToast(`La palabra debe tener ${secretWord.length} letras`);
     return;
   }
   
   if (!isValidWord(currentGuess)) {
-    showToast('No está en el diccionario');
+    showToast('Palabra no encontrada en el diccionario');
     return;
   }
   
